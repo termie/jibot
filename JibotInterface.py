@@ -407,6 +407,7 @@ class NickHandler(MessageHandler):
             list = m.params[-1].split()
             for nick in list:
                 self._cur_nicks[nick.lower()]=nick
+                self._heraldHandler.set_last_herald(nick)
                 self.add_nick(nick)
             return True
         elif (m.command == 'NICK'):
@@ -423,6 +424,8 @@ class NickHandler(MessageHandler):
         elif (m.command == 'JOIN'):
             self._root.set_cur_channel(m.params[0])
             nick=m.sender_nick()
+            if self._cur_nicks.has_key(nick.lower()):
+                return True
             self._cur_nicks[nick.lower()]=nick
             if not self._aliasDB.has_key(nick):
                 self.add_nick(nick.lower())
