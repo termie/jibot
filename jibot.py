@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.87 $"[11:-2]
-__date__ = "$Date: 2003/12/17 22:47:13 $"[7:-2]
+__cvsversion__ = "$Revision: 1.88 $"[11:-2]
+__date__ = "$Date: 2003/12/19 22:21:11 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -325,6 +325,8 @@ class jibot(irclib.irc):
 		elif (m.command == 'JOIN'):
 			self.curchannel =  m.params[0]
 			nick = string.split(m.prefix, '!')[0]
+			if not self.NickAka.has_key(nick.lower()) and not self.definitions.has_key(string.lower(nick)):
+				self.cmd_herald_unknown(nick)
 			self.nicks[nick] = nick
 			self.addnick(nick)
 			if (self.herald):
@@ -495,7 +497,7 @@ class jibot(irclib.irc):
 			if m in self.heraldme:
 			    self.cmd_def_first(m)
 			else:
-			    self.cmd_def(m)
+			    self.cmd_def_all(m,0)
 			self.herald_stamp = time.time()
 
 	""" 'Channel' commands """
@@ -944,10 +946,14 @@ class jibot(irclib.irc):
 		else:
 			self.say('I can only do that in a channel.')
 
-	def cmd_def_unknown(self, m):
+	def cmd_herald_unknown(self, m):
 		unknownphrases = ("It's puzzling, I don't think I've ever seen anything like %s before","No-one has dished the dirt on %s yet",
 		"Perhaps if %s makes friends with jeannie I'll say something nice next time", "Are you new here, %s?","Is %s a pseudonym?")
 		self.say(unknownphrases[int(random.random() *len(unknownphrases))] %(m))
+
+	def cmd_def_unknown(self, m,echoUnknown=1):
+		if echoUnknown:
+			self.say("No-one has defined '%s' yet" %(m))
 
 	def cmd_def_first(self, m):
 		concept = string.lower(m)
@@ -972,12 +978,13 @@ class jibot(irclib.irc):
 		if m in self.disfavorites:
 			self.say("%s is on %s's least favorites list" % (m,self.queen))
 
-	def cmd_def_all(self, m):
+	def cmd_def_all(self, m, echoUnknown=1):
+		found = 0
 		concept = string.lower(m)
 		if (self.definitions.has_key(concept)):
 			self.say('%s is %s' % (m,' and '.join(self.definitions[concept])))
+			found = 1
 		else:
-			found = 0
 			try:
 				nickList = ((self.masternicks[self.NickAka[concept]])['nicklist'])[:]
 				for akaNick in nickList:
@@ -986,14 +993,14 @@ class jibot(irclib.irc):
 						self.say('%s (aka %s) is %s' % (concept,aka,' and '.join(self.definitions[concept])))
 						found = 1
 			except:
-				self.cmd_def_unknown(m)
-				found = 1
+				found = 0
 			if not found:
-				self.cmd_def_unknown(m)
+				self.cmd_def_unknown(m,echoUnknown)
 		if m in self.favorites:
 			self.say("%s is on %s's favorites list" % (m,self.queen))
 		if m in self.disfavorites:
 			self.say("%s is on %s's least favorites list" % (m,self.queen))
+		return found
 
 	def cmd_firstdef(self, m):
 		if (m == ""):
