@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.96 $"[11:-2]
-__date__ = "$Date: 2004/02/27 19:04:18 $"[7:-2]
+__cvsversion__ = "$Revision: 1.97 $"[11:-2]
+__date__ = "$Date: 2004/04/06 08:10:49 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -215,6 +215,7 @@ class jibot(irclib.irc):
 	def do_privmsg(self, m):
 		""" Handles private message """
 		recipient, text = m.params
+		text = text.strip()
 		sender = m.prefix
 		self.sendernick = string.split(sender, '!')[0]
 		if (recipient == self.nick):
