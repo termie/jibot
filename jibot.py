@@ -5,17 +5,18 @@
 #
 #	Contributors
 #		Kevin Marks < http://epeus.blogspot.com/ >
+#		Jens-Christian Fischer
 #
 #	This script is based in simpleclient.py
 #		(C) 1999  Erno Kuusela <erno@iki.fi> 
 
 __author__ = "Victor R. Ruiz <rvr@infoastro.com>"
-__contributors__ = ['Kevin Marks']
+__contributors__ = ['Kevin Marks', 'Jens-Christian Fischer']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.6 $"[11:-2]
-__date__ = "$Date: 2003/06/10 19:43:32 $"[7:-2]
+__cvsversion__ = "$Revision: 1.7 $"[11:-2]
+__date__ = "$Date: 2003/06/10 19:55:54 $"[7:-2]
 
 import string, sys, os, re
 import random, time
