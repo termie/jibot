@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.86 $"[11:-2]
-__date__ = "$Date: 2003/12/17 22:38:20 $"[7:-2]
+__cvsversion__ = "$Revision: 1.87 $"[11:-2]
+__date__ = "$Date: 2003/12/17 22:47:13 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -1039,7 +1039,7 @@ class jibot(irclib.irc):
 			nick = words[0]
 			try:
 				k = self.karma[nick.lower()]
-				self.say('%s has %s %s' % (nick, k, self.pl('point', k)))
+				self.say('%s has %s %s' % (nick, k, self.pl('point', k, 's')))
 			except:
 				self.say('%s has no karma points' % nick)
 	def cmd_blog(self, m):
