@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.62 $"[11:-2]
-__date__ = "$Date: 2003/12/02 11:44:10 $"[7:-2]
+__cvsversion__ = "$Revision: 1.63 $"[11:-2]
+__date__ = "$Date: 2003/12/05 00:11:38 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -32,25 +32,44 @@ class jibot(irclib.irc):
 
 	def __init__(self):
 		""" Constructor """
-		self.cmdchars = '?'
-		self.curchannel = None
+		irclib.irc.__init__(self)
+		getenv = os.environ.get
+
+		# Begin configurable bits.
+
+		# Command prefix (for instance, '?' for '?def')
+		self.cmdchars = getenv('CMDCHARS') or '?'
+
+		# Announce people joining the channels.
+		self.herald = 1
+		# The owners of the bot.
+		self.owners = getenv('JIBOTOWNERS') or ['imajes','JoiIto','rvr','KevinMarks']
+
+		# IRC nickname
+		self.nick = getenv('IRCNICK') or 'jibot'
+		# IRC server
+		server = getenv('IRCSERVER') or 'irc.freenode.net'
+		# IRC full name (shown in /whois)
+		ircname = getenv('IRCNAME') or 'http://sf.net/projects/jibot/?%s' % __version__
+		# IRC username (____@host.com)
+		username  = getenv('USER') or 'jibot'
+		# IRC channels (space separated)
+		inchannels = getenv('IRCCHANNEL') or '#joiito #mobilewhack'
+		self.channels = inchannels.split()
+
+		# The queen of the channel.
+		self.queen = 'jeanniecool'
+
+		# Debug mode
+		# self.debug = 1
+
+		# End configurable options.
+
 		self.wannaquit = 0
 		self.hasquit = 0
 		self.heraldq = 0
+		self.curchannel = None
 		self.herald_stamp = time.time()
-		irclib.irc.__init__(self)
-		#self.debug = 1
-		# Variable declarations
-		getenv = os.environ.get
-		ircname = getenv('IRCNAME') or 'Python #joiito\'s bot'
-		self.nick = getenv('IRCNICK') or 'jibot'
-		username  = getenv('USER') or 'jibot|test'
-		server = getenv('IRSERVER') or 'irc.freenode.net'
-		inchannels = getenv('IRCCHANNEL') or '#joiito #mobilewhack'
-		self.channels = inchannels.split()
-		self.queen = 'jeanniecool'
-		self.owners = getenv('JIBOTOWNERS') or ['imajes','JoiIto','rvr', 'KevinMarks']
-		self.herald = 1
 		# Connects to the IRC server and joins the channel
 		self.connect(server)
 		self.send(irclib.msg(
@@ -902,10 +921,11 @@ class jibot(irclib.irc):
 				self.say("On %s's least favorites list: %s" % (self.sendernick, ",".join(self.disfavorites)))
 
 if __name__ == '__main__':
+	bot = jibot()
 	while (1):
 		try:
-			bot = jibot()
 			bot.loop()
+			bot = jibot()
 			
 		except irclib.IrcNetworkError, msg:
 			print 'lost connection,', msg
