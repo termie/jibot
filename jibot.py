@@ -13,9 +13,9 @@ __author__ = "Victor R. Ruiz <rvr@infoastro.com>"
 __contributors__ = ['Kevin Marks']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
-__version__ = "0.3"
-__cvsversion__ = "$Revision: 1.4 $"[11:-2]
-__date__ = "$Date: 2003/06/10 14:05:46 $"[7:-2]
+__version__ = "0.4"
+__cvsversion__ = "$Revision: 1.5 $"[11:-2]
+__date__ = "$Date: 2003/06/10 19:01:37 $"[7:-2]
 
 import string, sys, os, re
 import random, time
@@ -50,6 +50,15 @@ class jibot(irclib.irc):
 		self.send(irclib.msg(command='NICK', params = [ self.nick ]))
 		self.send(irclib.msg(command='JOIN', params=[ '#joiito' ]))
 		self.curchannel = '#joiito'
+		
+		# Load definitions from file
+		self.def_file = 'jibot.def'
+		try:
+			f = open(self.def_file, 'r')
+			self.definitions = pickle.load(f)
+			f.close()
+		except:
+			self.definitions = dict()
 		
 	def do_join(self, m):
 		""" /join #m """
@@ -211,17 +220,13 @@ class jibot(irclib.irc):
 		else:
 			self.say('JiBot and %s discreetly retreat to a secluded area in the #channel. Muffled noises suggest the things happening...' % (m))
 		
-
 	def cmd_help(self, m):
 		""" Show commands """
 		self.say('JiBot - #JoiIto\'s bot - http://joi.ito.com/joiwiki/JiBot')
-		self.say('?info http://my.blog.com - Show blog info (Technorati)')
-		self.say('?last http://my.blog.com - Display last blog post as in RSS feed (Technorati)')
-		self.say('?search words - Search words (Technorati)')
-		self.say('?google words - Search words (Google)')
-		self.say('?amazon words - Search words (Amazon)')
-		self.say('?isbn ISBNumber - Search ISBN (Amazon)')
-		self.say 
+		self.say('Dictionary: ?learn concept is definition || ?def concept')
+		self.say('Technorati: ?info blog.com || ?last blog.com')
+		self.say('Amazon: ?amazon words || ?isbn ISBN')
+		self.say('Google: ?search words')
 	
 	def cmd_info(self, m):
 		""" Display """
@@ -355,9 +360,46 @@ class jibot(irclib.irc):
 			
 		except:
 			self.say('I cannot search %s' % (m))
+	
+	def cmd_learn(self, m):
+		""" Learn a definition """
+		if (m == ""):
+			return
+		words = m.split()
+		if (len(words) < 3):
+			self.say('?learn some-concept is Not-very-long-definition ;)')
+			return
+		try:
+			pos = words.index('is') 
+		except:
+			self.say('?learn some-concept is Not-very-long-definition ;)')
+			return
+		
+		concept = string.lower(' '.join(words[:pos]))
+		definition = ' '.join(words[pos+1:])
+		self.definitions[concept] = definition
+		
+		# Save definition in file
+		try:
+			f = open(self.def_file, 'a')
+			pickle.dump(self.definitions, f)
+			f.close()
+			self.say('I am a smarter bot.')
+		except:
+			pass
 			
-	def cmd_introduction(self, m):
-		""" Introduction """
+	def cmd_def(self, m):
+		""" Display a stored definition """
+		if (m == ""):
+			return
+		concept = string.lower(m)
+		if (self.definitions.has_key(concept)):
+			self.say('%s is %s' % (m, self.definitions[concept]))
+		else:
+			self.say('I don\'t know anything about %s' % (m))
+
+	def cmd_introduce(self, m):
+		""" Introductions """
 		self.say('Excuse me, Joi Ito has ordered me (yes, really!) to say this:')
 		self.say('dsifry, who doesn\'t seem to be at his computer is the Technorati guy')
 		self.say('Kevin Burton, the newsmonster guy')
