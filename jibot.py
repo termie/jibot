@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.26 $"[11:-2]
-__date__ = "$Date: 2003/07/03 06:49:11 $"[7:-2]
+__cvsversion__ = "$Revision: 1.27 $"[11:-2]
+__date__ = "$Date: 2003/07/04 04:42:36 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -545,9 +545,14 @@ class jibot(irclib.irc):
 	def cmd_karma(self, m):
 		if (m == ""):
 			message = ""
+			count=0
 			for nick in self.karma:
+				count=count+1
 				message = "%s [%s: %s]" % (message, nick, self.karma[nick])
-			if (message):
+				if (count % 5) == 0:
+					self.say(message)
+					message=""
+			if (count % 5) > 0:
 				self.say(message)
 		else:
 			words = m.split()
