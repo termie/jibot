@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.70 $"[11:-2]
-__date__ = "$Date: 2003/12/05 02:22:42 $"[7:-2]
+__cvsversion__ = "$Revision: 1.71 $"[11:-2]
+__date__ = "$Date: 2003/12/05 02:31:51 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -59,6 +59,9 @@ class jibot(irclib.irc):
 
 		# The queen of the channel.
 		self.queen = 'jeanniecool'
+
+		# How we speak to the channels, either PRIVMSG or NOTICE
+		self.speech = 'PRIVMSG'
 
 		# Debug mode
 		# self.debug = 1
@@ -381,7 +384,7 @@ class jibot(irclib.irc):
 			print '-- no current channel!'
 			return
 		line = string.rstrip(line)
-		m = irclib.msg(command = 'PRIVMSG',
+		m = irclib.msg(command = self.speech,
 				params = [self.curchannel, line])
 		self.send(m)
 		time.sleep(1.0)
