@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.75 $"[11:-2]
-__date__ = "$Date: 2003/12/05 10:48:18 $"[7:-2]
+__cvsversion__ = "$Revision: 1.76 $"[11:-2]
+__date__ = "$Date: 2003/12/07 15:10:38 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -911,9 +911,9 @@ class jibot(irclib.irc):
 			try:
 				nickList = ((self.masternicks[self.NickAka[concept]])['nicklist'])[:]
 				for akaNick in nickList:
-					concept = string.lower(akaNick)
-					if (self.definitions.has_key(concept)):
-						self.cmd_def_first(concept)
+					aka = akaNick.lower()
+					if (self.definitions.has_key(aka)):
+						self.say('%s (aka %s) is %s' % (concept,aka,self.definitions[concept][0]))
 			except:
 				self.cmd_def_unknown(m)
 			if m in self.favorites:
@@ -929,9 +929,9 @@ class jibot(irclib.irc):
 			try:
 				nickList = ((self.masternicks[self.NickAka[concept]])['nicklist'])[:]
 				for akaNick in nickList:
-					concept = string.lower(akaNick)
-					if (self.definitions.has_key(concept)):
-						self.cmd_def_all(concept)
+					aka = akaNick.lower()
+					if (self.definitions.has_key(aka)):
+						self.say('%s (aka %s) is %s' % (concept,aka,' and '.join(self.definitions[concept])))
 			except:
 				self.cmd_def_unknown(m)
 			if m in self.favorites:
