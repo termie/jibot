@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.57 $"[11:-2]
-__date__ = "$Date: 2003/10/19 04:25:21 $"[7:-2]
+__cvsversion__ = "$Revision: 1.58 $"[11:-2]
+__date__ = "$Date: 2003/11/19 21:17:32 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -448,14 +448,20 @@ class jibot(irclib.irc):
 	def cmd_aka(self, m):
 		nick = string.lower(m)
 		if (self.NickAka.has_key(nick)):
-			nicklist = ((self.masternicks[self.NickAka[nick]])['nicklist'])[:]
-			for n in nicklist:
-				if (nick== string.lower(n)):
-					nicklist.remove(n)
-			if (len(nicklist)>0):
-				self.say ('%s is also known as %s' % (m," and ".join(nicklist)))
+			if self.masternicks.has_key(self.NickAka[nick]):
+				nicklist = ((self.masternicks[self.NickAka[nick]])['nicklist'])[:]
+				for n in nicklist:
+					if (nick== string.lower(n)):
+						nicklist.remove(n)
+				if (len(nicklist)>0):
+					self.say ('%s is also known as %s' % (m," and ".join(nicklist)))
+				else:
+					self.say('%s has no other names I know about' % (m))
 			else:
-				self.say('%s has no other names I know about' % (m))
+				#fix broken masternicks
+				self.nickAka[nick] = nick
+				self.addNick(m)
+				self.say('%s had a broken AKA list - try again' % (m))
 		else:
 			self.say('%s is not a nick I know' % (m))
 
