@@ -16,14 +16,15 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.95 $"[11:-2]
-__date__ = "$Date: 2004/02/10 08:37:31 $"[7:-2]
+__cvsversion__ = "$Revision: 1.96 $"[11:-2]
+__date__ = "$Date: 2004/02/27 19:04:18 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
 import cPickle as pickle
 #from Crypto.Hash import MD5
 
+import cgi
 import technorati, google, amazon, jargon
 import irclib, rssparser
 
@@ -1071,6 +1072,7 @@ class jibot(irclib.irc):
 			if (m == ""):
 				return
 			message = '%s\n%s' % (self.sendernick, m)
+			message = cgi.escape(message)
 			blog = xmlrpclib.Server('http://www.bloxus.com/RPC.php', verbose = 1)
 			try:
 				if (blog.blogger.newPost('APPKEY', '21', 'jibot', 'jibotblog', message, 1)):
