@@ -867,12 +867,12 @@ class DefHandler(MessageHandler):
         return True
 
     def cmd_learn_first(self,m,concept,definition):
-        def_list = self._defDB.get_def(concept,join=False)
-        if None == def_list:
-            self._defDB.put(concept,[definition])
+        if not self._defDB.has_def(concept):
+            self._defDB.add_def(concept,definition)
         else:
-            def_list[0] = definition
-            self._defDB.set(concept,def_list)
+            def_list = self._defDB.get_def(concept,join=False)
+            def_list = [definition] + def_list
+            self._defDB.set_def(concept,def_list)
         self.say_def(concept)
 
     def say_def(self,concept):

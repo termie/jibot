@@ -345,6 +345,8 @@ class DefWrapper(DatabaseWrapper):
         return self.get_def(key,join=True)
     
     def add_def(self,key,s):
+        if type(s) == type([]) or type(s) == type(()):
+            s = (" %s "%(self._db_join)).join(s)
         if self.has_def(key):
             def_list = self.get_def(key)
             s_list = s.split(" and ")
@@ -355,6 +357,11 @@ class DefWrapper(DatabaseWrapper):
         else:
             self._database.put(key,s)
         
+    def set_def(self,key,s):
+        if type(s) == type([]) or type(s) == type(()):
+            s = (" %s "%(self._db_join)).join(s)
+        self._database.set(key,s)
+    
     def remove_def(self,key,s):
         try:
             def_list = self.get_def(key)
