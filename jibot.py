@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.34 $"[11:-2]
-__date__ = "$Date: 2003/07/25 18:29:57 $"[7:-2]
+__cvsversion__ = "$Revision: 1.35 $"[11:-2]
+__date__ = "$Date: 2003/07/30 00:34:31 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -78,16 +78,27 @@ class jibot(irclib.irc):
 			self.karma = dict()
 		
 		# Load nick aliases from file
-		self.nick_file = 'jibot.nicks'
+		self.NickAka_file = 'jibot.NickAka'
 		try:
-			f = open(self.nick_file, 'r')
-			self.nickaka = pickle.load(f)
+			f = open(self.NickAka_file, 'r')
+			self.NickAka = pickle.load(f)
 			f.close()
 		except:
-			self.nickaka = dict()
-		#nickaka keeps track of name chnages
+			self.NickAka = dict()
+		# Load nick aliases from file
+		self.masternick_file = 'jibot.masternicks'
+		try:
+			f = open(self.masternick_file, 'r')
+			self.masternicks = pickle.load(f)
+			f.close()
+		except:
+			self.masternicks = dict()		
+		#NickAka keeps track of name changes by mapping from nick to master nick - a simple dictionary
+		#masternicks has the info mapping from nick ID to list of related ones and master nick
+		#dictioanry containing a dictionary with entries amsternick and nickList
 		#nicks is the current users
 		self.nicks = dict()
+		
 	def do_join(self, m):
 		""" /join #m """
 		self.send(irclib.msg(command='JOIN', params=[ self.curchannel ]))
@@ -135,6 +146,44 @@ class jibot(irclib.irc):
 		else:
 			print '[%s]' % self.sendernick,
 			print text
+	def addnick(self, nick):
+		lcNick =string.lower(nick)
+		if (not self.NickAka.has_key(lcNick)):
+			self.NickAka[lcNick] = lcNick
+			self.masternicks[lcNick] =dict()
+			(self.masternicks[lcNick])['nicklist']=[nick]
+		#print "nick aka:", self.NickAka
+		#print "masternicks:", self.masternicks
+		
+	def addnickalias(self, nick, aliasnick):
+		self.addnick(nick)
+		lcNick =string.lower(nick)
+		lcNickAka =string.lower(aliasnick)
+		if (lcNick ==lcNickAka):
+			return
+		if (self.NickAka.has_key(lcNickAka)):
+			if (self.NickAka[lcNickAka] == self.NickAka[lcNick]):
+				pass #already linked
+			else:
+				oldnicklist = ((self.masternicks[self.NickAka[lcNickAka]])['nicklist'])[:]
+				for oldnick in oldnicklist:
+					if (string.lower(oldnick) != lcNickAka and string.lower(oldnick) != lcNick):
+						self.addnickalias(nick, oldnick)
+		nickMaster = self.NickAka[lcNick]
+		self.NickAka[lcNickAka] = nickMaster
+		try:
+			i = (self.masternicks[nickMaster])['nicklist'].index(aliasnick)
+		except:
+			(self.masternicks[nickMaster])['nicklist'].append(aliasnick)
+		try:
+			f = open(self.NickAka_file, 'w')
+			pickle.dump(self.NickAka, f)
+			f.close()
+			f = open(self.masternick_file, 'w')
+			pickle.dump(self.masternicks, f)
+			f.close()
+		except:
+			pass
 
 	def do_any(self, m):
 		if (m.command == '353'):
@@ -142,18 +191,22 @@ class jibot(irclib.irc):
 			
 			for nick in list:
 				self.nicks[nick] = nick
+				self.addnick(nick)
 			print self.nicks
 		elif (m.command == 'NICK'):
 			nick = m.params[-1]
 			self.nicks[nick] = nick
 			oldnick = string.split(m.prefix, '!')[0]
-			del self.nicks[oldnick]
+			if (self.nicks.has_key(oldnick)):
+				del self.nicks[oldnick]
+			self.addnickalias(oldnick,nick)
 			if (self.herald):
 				if (self.definitions.has_key(string.lower(nick)) and (not self.definitions.has_key(string.lower(oldnick)))):
 					self.cmd_def(nick)
 		elif (m.command == 'JOIN'):
 			nick = string.split(m.prefix, '!')[0]
 			self.nicks[nick] = nick
+			self.addnick(nick)
 			if (self.herald):
 				self.cmd_def(nick)
 		elif (m.command == 'QUIT'):
@@ -297,6 +350,20 @@ class jibot(irclib.irc):
 
 	def cmd_knit(self, m):
 		self.say('%s picks up the knitting' % (m))
+
+	def cmd_aka(self, m):
+		nick = string.lower(m)
+		if (self.NickAka.has_key(nick)):
+			nicklist = ((self.masternicks[self.NickAka[nick]])['nicklist'])[:]
+			for n in nicklist:
+				if (nick== string.lower(n)):
+					nicklist.remove(n)
+			if (len(nicklist)>0):
+				self.say ('%s is also known as %s' % (m," and ".join(nicklist)))
+			else:
+				self.say('%s has no other names I know about' % (m))
+		else:
+			self.say('%s is not a nick I know' % (m))
 
 	def cmd_fight(self, m):
 		self.say('%s and %s go at it like hammer and tongs' % (m,self.sendernick))
@@ -531,7 +598,7 @@ class jibot(irclib.irc):
 			f = open(self.def_file, 'w')
 			pickle.dump(self.definitions, f)
 			f.close()
-			self.say('I understand now, Dr. Chandra.')
+			self.say('I understand now, Dr. Chandra; %s is %s' % (m, " & ".join(self.definitions[concept])))
 		except:
 			pass
 
@@ -573,16 +640,28 @@ class jibot(irclib.irc):
 	def cmd_def(self, m):
 		""" Display a stored definition """
 		if (m == ""):
-			self.say("I know about %s" % (" and ".join(self.definitions.keys())))
+			#self.say("I know about %s" % (" and ".join(self.definitions.keys())))
 			return
-		concept = string.lower(m)
-		if (self.definitions.has_key(concept)):
-			self.say('%s is %s' % (m, " and ".join(self.definitions[concept])))
-		else:
-			unknownphrases = ("It's puzzling, I don't think I've ever seen anything like %s before","No-one has dished the dirt on %s yet",
-			"Perhaps if %s makes friends with jeannie I'll say something nice next time", "Are you new here, %s?","Is %s a pseudonym?")
-			self.say(unknownphrases[int(random.random() *len(unknownphrases))] %(m))
-
+		words = m.split()
+		try:
+			pos = words.index('is') 
+			self.cmd_learn(m) #ie do this if there is an 'is' involved
+		except:
+			concept = string.lower(m)
+			if (self.definitions.has_key(concept)):
+				self.say('%s is %s' % (m, " and ".join(self.definitions[concept])))
+			else:
+				try:
+					nickList = ((self.masternicks[self.NickAka[concept]])['nicklist'])[:]
+					for akaNick in nickList:
+						concept = string.lower(akaNick)
+						if (self.definitions.has_key(concept)):
+							self.say('%s is aka %s, and %s is %s' % (m, akaNick,akaNick," and ".join(self.definitions[concept])))
+				except:
+					unknownphrases = ("It's puzzling, I don't think I've ever seen anything like %s before","No-one has dished the dirt on %s yet",
+					"Perhaps if %s makes friends with jeannie I'll say something nice next time", "Are you new here, %s?","Is %s a pseudonym?")
+					self.say(unknownphrases[int(random.random() *len(unknownphrases))] %(m))
+		
 	def cmd_introduce(self, m):
 		""" Introductions """
 		for k,v in self.nicks.items():
