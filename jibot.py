@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.28 $"[11:-2]
-__date__ = "$Date: 2003/07/05 21:42:10 $"[7:-2]
+__cvsversion__ = "$Revision: 1.29 $"[11:-2]
+__date__ = "$Date: 2003/07/06 10:52:36 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -141,6 +141,19 @@ class jibot(irclib.irc):
 			for nick in list:
 				self.nicks[nick] = nick
 			print self.nicks
+		elif (m.command == 'NICK'):
+			nick = m.params[-1]
+			self.nicks[nick] = nick
+			del self.nicks[string.split(m.prefix, '!')[0]]
+		elif (m.command == 'JOIN'):
+			nick = string.split(m.prefix, '!')[0]
+			self.nicks[nick] = nick
+		elif (m.command == 'QUIT'):
+			del self.nicks[string.split(m.prefix, '!')[0]]
+			print '%s quit' %(string.split(m.prefix, '!')[0])
+		elif (m.command == 'PART'):
+			del self.nicks[string.split(m.prefix, '!')[0]]
+			print '%s parted' %(string.split(m.prefix, '!')[0])
 		else:
 			print "%s - %s " % (m.command, "/".join(m.params))
 		
@@ -537,8 +550,8 @@ class jibot(irclib.irc):
 	def cmd_introduce(self, m):
 		""" Introductions """
 		for k,v in self.nicks.items():
-			if (self.definitions.has_key(k)):
-				self.say('%s is %s' % (k, " and ".join(self.definitions[k])))
+			if (self.definitions.has_key(string.lower(k))):
+				self.say('%s is %s' % (k, " and ".join(self.definitions[string.lower(k)])))
 
 
 	def cmd_assert(self, m):
