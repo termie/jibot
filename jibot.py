@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.68 $"[11:-2]
-__date__ = "$Date: 2003/12/05 01:16:58 $"[7:-2]
+__cvsversion__ = "$Revision: 1.69 $"[11:-2]
+__date__ = "$Date: 2003/12/05 02:08:11 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -83,7 +83,6 @@ class jibot(irclib.irc):
 			self.curchannel = channel
 		print 'done joining'
 		
-		
 		# Load definitions from file
 		self.def_file = 'jibot.def'
 		try:
@@ -104,6 +103,21 @@ class jibot(irclib.irc):
 			f.close()
 		except:
 			self.karma = dict()
+		# Purge karma of invalid karmas
+		for k in self.karma.keys():
+			try:
+				if not isinstance(k, str) or ' ' in k or not k.islower():
+					raise ValueError
+			except ValueError:
+				print 'Invalid karma key "%s" deleted' % k
+				del self.karma[k]
+		# Store cleaned karma to file
+		try:
+			f = open(self.karma_file, 'w')
+			pickle.dump(self.karma, f)
+			f.close()
+		except:
+			print 'Unable to save karma'
 		
 		# Load nick aliases from file
 		self.NickAka_file = 'jibot.NickAka'
