@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.35 $"[11:-2]
-__date__ = "$Date: 2003/07/30 00:34:31 $"[7:-2]
+__cvsversion__ = "$Revision: 1.36 $"[11:-2]
+__date__ = "$Date: 2003/08/01 07:36:08 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -280,7 +280,7 @@ class jibot(irclib.irc):
 		m = irclib.msg(command='PRIVMSG',
 				params = [self.curchannel, line])
 		self.send(m)
-		time.sleep(1.5)
+		time.sleep(1.0)
 
 	def get_next_word(self, s):
 		""" Next word """
@@ -378,12 +378,12 @@ class jibot(irclib.irc):
 	def cmd_help(self, m):
 		""" Show commands """
 		self.say('JiBot - #JoiIto\'s bot - http://joi.ito.com/joiwiki/JiBot')
-		self.say('Dictionary: ?learn concept is definition || ?def concept || ?whatis concept')
+		self.say('Dictionary and user info: ?learn concept is definition || ?whois concept || ?whatis concept')
 		self.say('Technorati: ?info blog.com || ?last blog.com || ?cosmos blog.com || ?search keywords')
 		self.say('Amazon: ?amazon words || ?isbn ISBN')
 		self.say('Google: ?google words')
 		self.say('Karma: nick++ || nick-- || ?karma nick || ?karma')
-		self.say('User list: ?introduce')
+		self.say('Turn on or off heralding: ?herald')
 	
 	def cmd_herald(self, m):
 		if (self.herald):
@@ -598,7 +598,7 @@ class jibot(irclib.irc):
 			f = open(self.def_file, 'w')
 			pickle.dump(self.definitions, f)
 			f.close()
-			self.say('I understand now, Dr. Chandra; %s is %s' % (m, " & ".join(self.definitions[concept])))
+			self.say('I understand now, Dr. Chandra; %s is %s' % (concept, " & ".join(self.definitions[concept])))
 		except:
 			pass
 
@@ -628,12 +628,15 @@ class jibot(irclib.irc):
 			return;
 		if (len(self.definitions[concept]) ==0):
 			del self.definitions[concept]
+			self.say('I have expunged %s from my mind' % (concept))
+		else:
+			self.say('I now only know that %s is %s' % (concept, " & ".join(self.definitions[concept])))
 		try:
 			f = open(self.def_file, 'w')
 			pickle.dump(self.definitions, f)
 			f.close()
-			dumbphrases = ('I am now a dumber bot','Dave, my mind is going...')
-			self.say(dumbphrases[int(random.random() *len(dumbphrases))])
+			#dumbphrases = ('I am now a dumber bot','Dave, my mind is going...')
+			#self.say(dumbphrases[int(random.random() *len(dumbphrases))])
 		except:
 			pass
 			
