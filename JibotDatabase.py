@@ -320,7 +320,7 @@ class DefWrapper(DatabaseWrapper):
         # We may be able to get rid of this once all old defs have been re-parsed...    
         if None != out:
             out = self._db_split.split(out)
-            out = filter(lambda x: len(x) > 3, out)
+            out = filter(self.is_valid_def, out)
             # Some auto correction for the database: removes the entry if
             # there are no good defs...
             if 1 > len(out):
@@ -338,6 +338,11 @@ class DefWrapper(DatabaseWrapper):
                 join_char = self._join_char_long
             out = (" %s "%(join_char)).join(out)
         return out
+    
+    def is_valid_def(self,s):
+        if 3 > len(s): return False
+        if s.startswith("%s "%(self._db_join)): return False
+        return True
     
     def get_def_first(self,key):
         """ Shortcut """
@@ -369,18 +374,20 @@ class DefWrapper(DatabaseWrapper):
         rem_list = re.split("^and\s|^%s\s|\sand\s|\s%s\s"%(self._db_join,self._db_join), s)
         def_list = self.get_def(key)
         bad_list = [] #The defs that couldn't be removed
+        some_removed = False
         for x in rem_list:
             if 1 > len(x): continue
             try:
                 i = def_list.index(x)
                 del def_list[i]
+                some_removed = True
             except:
                 bad_list.append(x)
         if 1 > len(def_list):
             self._database.remove(key)
         else:
             self._database.set(key,(" %s "%(self._db_join)).join(def_list))
-        return bad_list #The ?forget function will have to check this list
+        return {'rem_list':rem_list,'bad_list':bad_list,'some_removed':some_removed} #The ?forget function will have to check this list
     
 class HeraldWrapper(DatabaseWrapper):
     def __init__(self,database):

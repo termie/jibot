@@ -859,16 +859,16 @@ class DefHandler(MessageHandler):
         return True
 
     def cmd_forget(self,m,concept,definition):
-        unremovable_defs = self._defDB.remove_def(concept,definition)
-       
-        if self._defDB.has_def(concept):
-            self._root.say("I now only know that %s is %s" \
-                % (concept, self._defDB.get_def_all(concept)))   
-        else:
-            self._root.say("I no longer know anything about %s"%(concept))
-        if 0 < len(unremovable_defs):
+        def_change = self._defDB.remove_def(concept,definition)
+        if def_change['some_removed']:
+            if self._defDB.has_def(concept):
+                self._root.say("I now only know that %s is %s" \
+                    % (concept, self._defDB.get_def_all(concept)))   
+            else:
+                self._root.say("I no longer know anything about %s"%(concept))
+        if 0 < len(def_change['bad_list']):
             self._root.say("I did not know %s was %s" \
-                %(concept," and ".join(unremovable_defs)))
+                %(concept," and ".join(def_change['bad_list'])))
         return True
 
     def cmd_forgetme(self,m,nick):
