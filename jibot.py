@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.78 $"[11:-2]
-__date__ = "$Date: 2003/12/08 11:00:32 $"[7:-2]
+__cvsversion__ = "$Revision: 1.79 $"[11:-2]
+__date__ = "$Date: 2003/12/08 12:39:40 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -589,26 +589,50 @@ class jibot(irclib.irc):
 		except:
 			self.say('Sorry %s is not in this universe' % (m))
 
+	def fetch_rss(self, url):
+		try:
+			rss = rssparser.parse(url)
+			if (len(rss['items']) > 0):
+				# Remove html links
+				desc = re.compile('(<p>|<br>)').sub(' ', rss['items'][0]['description'].encode('ISO-8859-1'))
+				desc = re.compile('<(.*?)>').sub('', desc)
+				return desc
+		except:
+			print 'Unable to fetch RSS for %s' % url
+
+		return
+
+	def cmd_rss(self, url):
+		""" Last post from a given RSS feed """
+		if (url == ""):
+			return
+		try:
+			desc = self.fetch_rss(url)
+			if (len(desc) > 0):
+				self.say('%s: %s [...]' % (self.sendernick, desc[:250]))
+			else:
+				self.say('%s: That RSS feed has no posts.')
+		except:
+			self.say('Unable to fetch RSS for %s' % url)
+		return
+
 	def cmd_last(self, m):
-		""" Last post as in RSS feed """
+		""" Last post from a given blog (using Technorati for the RSS) """
 		if (m == ""):
 			return
 		try:
 			info = technorati.bloginfo(m)
 			if (info.rssurl):
-				rss = rssparser.parse(info.rssurl)
-				if (len(rss['items']) > 0):
-					# Remove html links
-					desc = re.compile('(<p>|<br>)').sub(' ', rss['items'][0]['description'].encode('ISO-8859-1'))
-					desc = re.compile('<(.*?)>').sub('', desc)
+				desc = self.fetch_rss(info.rssurl)
+				if (len(desc) > 0):
 					lastupdate = "%02d-%02d-%02d %02d:%02d" % info.lastupdate[:5]
 					self.say('%s\'s latest post at %s: %s' % (info.name.encode('ISO-8859-1'), lastupdate, desc[:200]))
 				else:
 					self.say('No posts in %s\'s RSS feed' % (info.name.encode('ISO-8859-1')))
 			else:
-				self.say('This blog doesn\'t have RSS feed')
+				self.say('I cannot find an RSS feed for %s' % m)
 		except:
-			self.say('I cannot read %s\'s info. Look Dave, I can see you\'re really upset about this. I honestly think you ought to sit down calmly, take a stress pill and think things over.' % (m))
+			self.say('I cannot get info about %s\'s from Technorati. I honestly think you ought to sit down calmly, take a stress pill and think things over.' % (m))
 
 	def cmd_search(self, m):
 		""" Search in technorati """
