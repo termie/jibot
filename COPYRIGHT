@@ -1,7 +1,10 @@
 COPYRIGHT
 ---------
 
-jibot - #joiito's IRC bot 
+jibot 0.6 - #joiito's IRC bot
+    (C) 2004 by Andy Smith <asmith@anarkystic.com>
+    
+Based on the original jibot code
 	(C) 2003 Víctor R. Ruiz <rvr@infoastro.com>
 
 Contributors

@@ -1,7 +1,13 @@
 INSTALL
 -------
 
-jibot needs Python > 2.x
+jibot needs Python 2.3
+
+- for SQLite support you will need to get SQLite, info available at
+  pysqlite.sourceforge.net
+
+If you are upgrading from a pre-SQLite version and would like to convert the
+databases, the "dbconverter.py" script should help you, but you will need to modify it.
 
 From http://diveintomark.org/projects/ download the following
 libraries:
@@ -11,4 +17,4 @@ libraries:
 	- PyGoogle
 	- RSS Parser
 
-You need Technorati, Amazon and Google application keys.
+You will need Technorati, Amazon and Google application keys.

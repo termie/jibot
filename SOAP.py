@@ -101,7 +101,7 @@ from types import *
 try: from M2Crypto import SSL
 except: pass
 
-ident = '$Id: SOAP.py,v 1.1 2003/06/09 17:23:17 vrruiz Exp $'
+ident = '$Id: SOAP.py,v 1.2 2004/04/22 18:30:39 termie Exp $'
 
 __version__ = "0.9.7.3"
 

@@ -61,8 +61,8 @@ Other usage notes:
 
 __author__ = "Mark Pilgrim (f8dy@diveintomark.org)"
 __version__ = "0.1"
-__cvsversion__ = "$Revision: 1.1 $"[11:-2]
-__date__ = "$Date: 2003/06/09 17:23:21 $"[7:-2]
+__cvsversion__ = "$Revision: 1.2 $"[11:-2]
+__date__ = "$Date: 2004/04/22 18:30:56 $"[7:-2]
 __copyright__ = "Copyright (c) 2003 Mark Pilgrim"
 __license__ = "Python"
 

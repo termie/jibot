@@ -1,5 +1,26 @@
 CHANGES
 -------
+2004-04-20 - 0.6
+    - Now requires Python 2.3 and SQLite (for SQLite db integration)
+    - Massive refactor, jibot.py has been replaced by JibotConfig,
+      JibotDatabase, JibotInterface, JibotLaunch, and JibotOptions
+    - Added command-line option parsing
+    - Added configuration file parsing
+    - Included test and debug startup scripts and configurations
+    - Included a rudimentary jibot pickle to sqlite database converter
+    - Added commands savedefs, savenicks, savekarmas, savefavors, join,
+      part, silence, quiet, unquiet
+    - Added support for SQLite databases, as well as a database abstraction
+      layer for future database integrations
+    - Combined favorites and disfavorites into one database
+    - Removed the 'lastherald' property of a masternick entry, the masternick
+      database now only holds the aka's of each nick
+    - Added parsing of "and" and "&" in defs, separating the definitions
+    - Added incoming string sanitization to remove unprintable characters
+    - Moved to the new Amazon XMLRPC url
+    - The karmadump.rpy and braindump.rpy aren't really being used at all
+      right now, that should change later on, but for now that stuff is on hold
+    
 2003-06-19
 	- Added technorati cosmos command
 

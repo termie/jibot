@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-# $Id: irclib.py,v 1.2 2003/10/08 23:35:17 kevinmarks Exp $
+# $Id: irclib.py,v 1.3 2004/04/22 18:30:39 termie Exp $
 
 
 '''

@@ -1,19 +1,44 @@
 STARTING THE BOT
 ----------------
 
-	Unix: $ python jibot.py
-	Windows: C:\> start jibot.py
+    Unix: $ python JibotLaunch.py
+	Windows: C:\> python JibotLaunch.py
+
+    A default config file is included as jibot.conf
+
+COMMAND-LINE OPTIONS
+--------------------
+
+JibotLaunch.py supports the following options:
+    -v, --verbose   Gives you more output to STDOUT, use twice for more effect
+    -c, --config    Lets you specify the config file to load
 
 	
 ADDING COMMANDS
 ---------------
 
-It is easy to add new commands to the bot. Just modify the jibot class
-and add a cmd_command_name function. Must have a parameter:
+Commands are done via handlers now, to add a new set of commands extend the
+MessageHandler class in JibotInterface, in handle you will want to run a check
+for the command text against m.cmd, the text after the command character
+(usually '?) is parsed by the message class itself if there is any, e.g.:
 
-	def cmd_hello(self, m):
-		self.say('Hello')
-	
-	<rvr> ?hello
-	<jibot> Hello
+HelloWorldHandler(MessageHandler):
+    def __init__(self,root,name='HelloWorldHandler'):
+        MessageHandler.__init__(self,root=root,name=name)
+        self._handles=("hello",) #note: this is a tuple
+    
+    def handle(self,m):
+        MessageHandler.handle(self,m)
+        if "hello" == m.cmd:
+            self._root.say("Hello")
+            return True
 
+
+Then in JibotLaunch you will want to add this as a handler under the CmdHandler
+object, eg.:
+    
+    helloHandler = HelloWorldHandler(root=jibot)
+    cmdHandler.add_handler(helloHandler)
+
+
+The documentation on most of the additions is pretty poor, so bear with us.

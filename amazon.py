@@ -55,8 +55,8 @@ Other usage notes:
 
 __author__ = "Mark Pilgrim (f8dy@diveintomark.org)"
 __version__ = "0.61"
-__cvsversion__ = "$Revision: 1.1 $"[11:-2]
-__date__ = "$Date: 2003/06/09 17:23:22 $"[7:-2]
+__cvsversion__ = "$Revision: 1.2 $"[11:-2]
+__date__ = "$Date: 2004/04/22 18:30:39 $"[7:-2]
 __copyright__ = "Copyright (c) 2002 Mark Pilgrim"
 __license__ = "Python"
 # Powersearch and return object type fix by Joseph Reagle <geek@goatee.net>
@@ -174,7 +174,7 @@ def unmarshal(element):
     return rc
 
 def buildURL(search_type, keyword, product_line, type, page, license_key):
-    url = "http://xml.amazon.com/onca/xml?v=1.0&f=xml&t=webservices-20"
+    url = "http://xml.amazon.com/onca/xml3?v=1.0&f=xml&t=webservices-20"
     url += "&dev-t=%s" % license_key.strip()
     url += "&type=%s" % type
     if page:
