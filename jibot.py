@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.47 $"[11:-2]
-__date__ = "$Date: 2003/09/14 16:00:58 $"[7:-2]
+__cvsversion__ = "$Revision: 1.48 $"[11:-2]
+__date__ = "$Date: 2003/09/18 09:07:13 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -46,7 +46,8 @@ class jibot(irclib.irc):
 		self.nick = getenv('IRCNICK') or 'jibot'
 		username  = getenv('USER') or 'jibot|test'
 		server = getenv('IRSERVER') or 'irc.freenode.net'
-		channel = getenv('IRCCHANNEL') or '#joiito'
+		inchannels = getenv('IRCCHANNEL') or '#joiito #bloggercon'
+		self.channels = inchannels.split()
 		self.queen = 'jeanniecool'
 		self.owners = getenv('JIBOTOWNERS') or ['imajes','JoiIto','rvr', 'KevinMarks']
 		self.herald = 1
@@ -56,8 +57,11 @@ class jibot(irclib.irc):
 			command='USER',
 			params = [ username, 'localhost', 'localhost', ircname ]))
 		self.send(irclib.msg(command='NICK', params = [ self.nick ]))
-		self.send(irclib.msg(command='JOIN', params=[ channel ]))
-		self.curchannel = channel
+		print "setting nick to %s" % (self.nick)
+		for channel in self.channels:
+			self.send(irclib.msg(command='JOIN', params=[ channel ]))
+			print "joining channel %s" % (channel)
+			self.curchannel = channel
 		print 'done joining'
 		
 		
@@ -133,7 +137,12 @@ class jibot(irclib.irc):
 		recipient, text = m.params
 		sender = m.prefix
 		self.sendernick = string.split(sender, '!')[0]
-
+		if (recipient == self.nick):
+			#self.curchannel = self.sendernick #use msg
+			self.msg = 1
+		else:
+			self.msg =0
+			self.curchannel =  recipient
 		if recipient[0] not in irclib.NICKCHARS:
 			if (text[0] == self.cmdchars):
 				self.channel_cmd(text)
@@ -164,7 +173,7 @@ class jibot(irclib.irc):
 					except:
 						pass
 		else:
-			print '[%s]' % self.sendernick,
+			print '[%s]' % self.sendernick, 'to (%s)' % recipient,
 			print text
 	def addnick(self, nick):
 		lcNick =string.lower(nick)
