@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.82 $"[11:-2]
-__date__ = "$Date: 2003/12/11 23:56:28 $"[7:-2]
+__cvsversion__ = "$Revision: 1.83 $"[11:-2]
+__date__ = "$Date: 2003/12/12 00:05:11 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -983,10 +983,10 @@ class jibot(irclib.irc):
 				found = 1
 			if not found:
 				self.cmd_def_unknown(m)
-			if m in self.favorites:
-				self.say("%s is on %s's favorites list" % (m,self.queen))
-			if m in self.disfavorites:
-				self.say("%s is on %s's least favorites list" % (m,self.queen))
+		if m in self.favorites:
+			self.say("%s is on %s's favorites list" % (m,self.queen))
+		if m in self.disfavorites:
+			self.say("%s is on %s's least favorites list" % (m,self.queen))
 
 	def cmd_firstdef(self, m):
 		if (m == ""):
