@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.30 $"[11:-2]
-__date__ = "$Date: 2003/07/07 08:46:19 $"[7:-2]
+__cvsversion__ = "$Revision: 1.31 $"[11:-2]
+__date__ = "$Date: 2003/07/08 00:03:01 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -310,7 +310,7 @@ class jibot(irclib.irc):
 	def cmd_help(self, m):
 		""" Show commands """
 		self.say('JiBot - #JoiIto\'s bot - http://joi.ito.com/joiwiki/JiBot')
-		self.say('Dictionary: ?learn concept is definition || ?def concept')
+		self.say('Dictionary: ?learn concept is definition || ?def concept || ?whatis concept')
 		self.say('Technorati: ?info blog.com || ?last blog.com || ?cosmos blog.com || ?search keywords')
 		self.say('Amazon: ?amazon words || ?isbn ISBN')
 		self.say('Google: ?google words')
@@ -441,6 +441,12 @@ class jibot(irclib.irc):
 
 	def cmd_blogrep(self, m):
 		self.cmd_search(m)
+
+	def cmd_whatis(self, m):
+		self.cmd_def(m)
+
+	def cmd_whois(self, m):
+		self.cmd_def(m)
 
 	def cmd_amazon(self, m):
 		""" Search keywords in Amazon """
