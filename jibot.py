@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.50 $"[11:-2]
-__date__ = "$Date: 2003/09/19 16:27:36 $"[7:-2]
+__cvsversion__ = "$Revision: 1.51 $"[11:-2]
+__date__ = "$Date: 2003/09/19 16:43:18 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -829,7 +829,7 @@ class jibot(irclib.irc):
 			words = m.split()
 			nick = words[0]
 			try:
-				self.say('%s has %s points' % (nick, self.karma[nick]))
+				self.say('%s has %s points' % (nick, self.karma[nick.lower()]))
 			except:
 				pass
 	def cmd_blog(self, m):
