@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.63 $"[11:-2]
-__date__ = "$Date: 2003/12/05 00:11:38 $"[7:-2]
+__cvsversion__ = "$Revision: 1.64 $"[11:-2]
+__date__ = "$Date: 2003/12/05 00:14:46 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -145,11 +145,11 @@ class jibot(irclib.irc):
 		
 	def do_join(self, m):
 		""" /join #m """
-		self.send(irclib.msg(command='JOIN', params=[ self.curchannel ]))
+		self.send(irclib.msg(command = 'JOIN', params = [ self.curchannel ]))
 
 	def do_ping(self, m):
 		""" /ping """
-		reply = irclib.msg(command = 'PONG', params=[m.params[0]])
+		reply = irclib.msg(command = 'PONG', params = [m.params[0]])
 		self.send(reply)
 
 	def do_privmsg(self, m):
@@ -161,7 +161,7 @@ class jibot(irclib.irc):
 			#self.curchannel = self.sendernick #use msg
 			self.msg = 1
 		else:
-			self.msg =0
+			self.msg = 0
 			self.curchannel =  recipient
 		if recipient[0] not in irclib.NICKCHARS:
 			if (text[0] == self.cmdchars):
@@ -182,7 +182,7 @@ class jibot(irclib.irc):
 						self.karma[who] += 1
 					if (text[-2:] == '--'):
 						self.karma[who] -= 1
-					if (self.karma[who] ==0):
+					if (self.karma[who] == 0):
 						del self.karma[who]
 					# Save definition in file
 					try:
@@ -197,22 +197,22 @@ class jibot(irclib.irc):
 			print '[%s]' % self.sendernick, 'to (%s)' % recipient,
 			print text
 	def addnick(self, nick):
-		lcNick =string.lower(nick)
+		lcNick = string.lower(nick)
 		if (not self.NickAka.has_key(lcNick)):
 			self.NickAka[lcNick] = lcNick
 		if not self.masternicks.has_key(lcNick):
-			self.masternicks[lcNick] =dict()
-			(self.masternicks[lcNick])['nicklist']=[nick]
+			self.masternicks[lcNick] = dict()
+			(self.masternicks[lcNick])['nicklist'] = [nick]
 		#print "nick aka:", self.NickAka
 		#print "masternicks:", self.masternicks
 		
 	def addnickalias(self, nick, aliasnick):
 		self.addnick(nick)
 		self.addnick(aliasnick)
-		lcNick =string.lower(nick)
-		lcNickAka =string.lower(aliasnick)
+		lcNick = string.lower(nick)
+		lcNickAka = string.lower(aliasnick)
 		nickMaster = self.NickAka[lcNick]
-		if (lcNick ==lcNickAka):
+		if (lcNick == lcNickAka):
 			return
 		if (self.NickAka.has_key(lcNickAka)):
 			if (self.NickAka[lcNickAka] == self.NickAka[lcNick]):
@@ -355,7 +355,7 @@ class jibot(irclib.irc):
 			print '-- no current channel!'
 			return
 		line = string.rstrip(line)
-		m = irclib.msg(command='PRIVMSG',
+		m = irclib.msg(command = 'PRIVMSG',
 				params = [self.curchannel, line])
 		self.send(m)
 		time.sleep(1.0)
@@ -367,7 +367,7 @@ class jibot(irclib.irc):
 			return
 		line = string.rstrip(line)
 		line = '\001ACTION' + line + '\001'  
-		m = irclib.msg(command='PRIVMSG',
+		m = irclib.msg(command = 'PRIVMSG',
 			       params = [self.curchannel, line])
 		self.send(m)
 		time.sleep(1.5)
@@ -379,7 +379,7 @@ class jibot(irclib.irc):
 		    if the bot quit early, and if so, just send a msg rather than the
 		    quit line """
 		line = string.rstrip(line)
-		m = irclib.msg(command='QUIT',
+		m = irclib.msg(command = 'QUIT',
 			       params = [line])
 		self.send(m)
 		time.sleep(1.5)
@@ -437,7 +437,7 @@ class jibot(irclib.irc):
 
 	def usercmd_msg(self, l):
 		recipient, rest = self.get_next_word(l)
-		self.send(irclib.msg(command='PRIVMSG',
+		self.send(irclib.msg(command = 'PRIVMSG',
 				  params = [recipient, rest]))
 		print '-->', recipient, ':', rest
 
@@ -470,7 +470,7 @@ class jibot(irclib.irc):
 			if self.masternicks.has_key(self.NickAka[nick]):
 				nicklist = ((self.masternicks[self.NickAka[nick]])['nicklist'])[:]
 				for n in nicklist:
-					if (nick== string.lower(n)):
+					if (nick == string.lower(n)):
 						nicklist.remove(n)
 				if (len(nicklist)>0):
 					self.say ('%s is also known as %s' % (m," and ".join(nicklist)))
@@ -732,7 +732,7 @@ class jibot(irclib.irc):
 			lcOldNick = string.lower(oldNick)
 			lcNick = string.lower(self.sendernick)
 			if (self.NickAka.has_key(lcOldNick)):
-				if (self.NickAka[lcNick]==self.NickAka[lcOldNick]):
+				if (self.NickAka[lcNick] == self.NickAka[lcOldNick]):
 					nicklist = (self.masternicks[self.NickAka[lcNick]])['nicklist']
 					for nick in nicklist:
 						if (string.lower(nick) == lcOldNick):
@@ -784,7 +784,7 @@ class jibot(irclib.irc):
 		else:
 			self.say('I didn\'t know %s was %s' % (concept, definition))
 			return;
-		if (len(self.definitions[concept]) ==0):
+		if (len(self.definitions[concept]) == 0):
 			del self.definitions[concept]
 			self.say('I have expunged %s from my mind' % (concept))
 		else:
@@ -854,7 +854,7 @@ class jibot(irclib.irc):
 		if (m == ""):
 			return
 		message = '%s\n%s' % (self.sendernick, m)
-		blog = xmlrpclib.Server('http://www.bloxus.com/RPC.php', verbose=1)
+		blog = xmlrpclib.Server('http://www.bloxus.com/RPC.php', verbose = 1)
 		try:
 			if (blog.blogger.newPost('APPKEY', '21', 'jibot', 'jibotblog', message, 1)):
 				self.say('Posted.')
