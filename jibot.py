@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.94 $"[11:-2]
-__date__ = "$Date: 2004/02/07 05:25:32 $"[7:-2]
+__cvsversion__ = "$Revision: 1.95 $"[11:-2]
+__date__ = "$Date: 2004/02/10 08:37:31 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -60,7 +60,7 @@ class jibot(irclib.irc):
 		# The queen of the channel.
 		self.queen = 'jeanniecool'
 		# The bots of the channel.
-		self.bots = [ 'xena', 'datum', 'shorten', 'workbench', 'surly', 'chomp','tangra','pvg' ]
+		self.bots = [ 'xena', 'datum', 'shorten', 'workbench', 'surly', 'chomp' ]
 
 		# How we speak to the channels, either PRIVMSG or NOTICE
 		self.speech = 'PRIVMSG'
