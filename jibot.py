@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.46 $"[11:-2]
-__date__ = "$Date: 2003/09/04 11:16:57 $"[7:-2]
+__cvsversion__ = "$Revision: 1.47 $"[11:-2]
+__date__ = "$Date: 2003/09/14 16:00:58 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -245,12 +245,10 @@ class jibot(irclib.irc):
 			self.addnick(nick)
 			if (self.herald):
 				self.queue_herald(nick)
-		elif (m.command == 'QUIT'):
-			del self.nicks[string.split(m.prefix, '!')[0]]
-			print '%s quit' %(string.split(m.prefix, '!')[0])
-		elif (m.command == 'PART'):
-			del self.nicks[string.split(m.prefix, '!')[0]]
-			print '%s parted' %(string.split(m.prefix, '!')[0])
+		elif (m.command == 'QUIT') or (m.command == 'PART'):
+			oldnick = string.split(m.prefix, '!')[0]
+			if (self.nicks.has_key(oldnick)):
+				del self.nicks[oldnick]
 		else:
 			print "%s - %s " % (m.command, "/".join(m.params))
 		
