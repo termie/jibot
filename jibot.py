@@ -14,8 +14,8 @@ __contributors__ = ['Kevin Marks']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.5 $"[11:-2]
-__date__ = "$Date: 2003/06/10 19:01:37 $"[7:-2]
+__cvsversion__ = "$Revision: 1.6 $"[11:-2]
+__date__ = "$Date: 2003/06/10 19:43:32 $"[7:-2]
 
 import string, sys, os, re
 import random, time
@@ -41,6 +41,7 @@ class jibot(irclib.irc):
 		self.nick = getenv('IRCNICK') or 'jibot'
 		username  = getenv('USER') or 'jibot'
 		server = getenv('IRSERVER') or 'irc.freenode.net'
+		channel = getenv('IRCCHANNEL') or '#joiito'
 		
 		# Connects to the IRC server and joins the channel
 		self.connect(server)
@@ -48,8 +49,8 @@ class jibot(irclib.irc):
 			command='USER',
 			params = [ username, 'localhost', 'localhost', ircname ]))
 		self.send(irclib.msg(command='NICK', params = [ self.nick ]))
-		self.send(irclib.msg(command='JOIN', params=[ '#joiito' ]))
-		self.curchannel = '#joiito'
+		self.send(irclib.msg(command='JOIN', params=[ channel ]))
+		self.curchannel = channel
 		
 		# Load definitions from file
 		self.def_file = 'jibot.def'
