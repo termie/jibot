@@ -630,7 +630,7 @@ class FavorHandler(MessageHandler):
             return False
     
     def say_favor(self,nick):
-        if self._favorDB.has_key(nick)):
+        if self._favorDB.has_key(nick):
             favor=self._favorDB.get(nick)
             if "1" == favor:
                 self._root.say("%s is on %s's favorites list"%(nick,self.queen))
