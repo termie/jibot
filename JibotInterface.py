@@ -607,9 +607,9 @@ class FavorHandler(MessageHandler):
     def say_favor(self,nick):
         if self._favorDB.has_key(nick.lower()):
             favor=self._favorDB.get(nick.lower())
-            if favor:
+            if 1 == favor:
                 self._root.say("%s is on %s's favorites list"%(nick,self.queen))
-            else:
+            elif -1 == favor:
                 self._root.say("%s is on %s's least favorites list"%(nick,self.queen))
         else:
             pass
