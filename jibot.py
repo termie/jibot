@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.49 $"[11:-2]
-__date__ = "$Date: 2003/09/18 09:23:18 $"[7:-2]
+__cvsversion__ = "$Revision: 1.50 $"[11:-2]
+__date__ = "$Date: 2003/09/19 16:27:36 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -195,8 +195,12 @@ class jibot(irclib.irc):
 			if (self.NickAka[lcNickAka] == self.NickAka[lcNick]):
 				return #already linked
 			else:
-				oldnicklist = ((self.masternicks[self.NickAka[lcNickAka]])['nicklist'])[:]
-				del self.masternicks[self.NickAka[lcNickAka]]
+				try:
+					oldnicklist = ((self.masternicks[self.NickAka[lcNickAka]])['nicklist'])[:]
+					del self.masternicks[self.NickAka[lcNickAka]]
+				except:
+					oldnicklist = [aliasnick]
+
 		else:
 			oldnicklist = [aliasnick]
 		for oldnick in oldnicklist:
