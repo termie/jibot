@@ -15,8 +15,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.13 $"[11:-2]
-__date__ = "$Date: 2003/06/13 01:17:09 $"[7:-2]
+__cvsversion__ = "$Revision: 1.14 $"[11:-2]
+__date__ = "$Date: 2003/06/13 01:28:50 $"[7:-2]
 
 import string, sys, os, re
 import random, time
@@ -39,7 +39,7 @@ class jibot(irclib.irc):
 		# Variable declarations
 		getenv = os.environ.get
 		ircname = getenv('IRCNAME') or 'Python #joiito\'s bot'
-		self.nick = getenv('IRCNICK') or 'jibot'
+		self.nick = getenv('IRCNICK') or 'jibot0_4'
 		username  = getenv('USER') or 'jibot'
 		server = getenv('IRSERVER') or 'irc.freenode.net'
 		channel = getenv('IRCCHANNEL') or '#joiito'
@@ -91,7 +91,7 @@ class jibot(irclib.irc):
 				print '<%s:%s> %s\n' % (self.sendernick, recipient, text)
 			elif (text[-2:] == '++' or text[-2:] == '--'):
 				# Karma
-				who = string.lowercase(text[:-2])
+				who = string.lower(text[:-2])
 				if (len(who) > 0):
 					if (self.karma.has_key(who)):
 						pass
