@@ -941,7 +941,7 @@ class SystemHandler(MessageHandler):
             self._root.say_only_owners(m)
             return True
         elif "quit" == m.cmd:
-            self.cmd_quit(m)
+            self.cmd_quit(m,m.rest)
             return True
         elif "join" == m.cmd:
             self.cmd_join(m,m.rest)
@@ -964,9 +964,11 @@ class SystemHandler(MessageHandler):
         else:
             return False
 
-    def cmd_quit(self,m):
+    def cmd_quit(self,m,s):
+        if 0 == len(s):
+            s = "Planned Shutdown"
         self._root.logger.info("Quit called for by %s"%(m.sender_nick))
-        self._root.quit("Planned Shutdown")
+        self._root.quit(s)
         return True
         
     def cmd_help(self,m,nick):
