@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.66 $"[11:-2]
-__date__ = "$Date: 2003/12/05 00:25:13 $"[7:-2]
+__cvsversion__ = "$Revision: 1.67 $"[11:-2]
+__date__ = "$Date: 2003/12/05 01:12:38 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -152,6 +152,29 @@ class jibot(irclib.irc):
 		reply = irclib.msg(command = 'PONG', params = [m.params[0]])
 		self.send(reply)
 
+	def handle_karma(self, who, text):
+		if (len(who) > 0 and len(text) > 0):
+			if (self.karma.has_key(who)):
+				pass
+			else:
+				self.karma[who] = 0
+
+			if (text[-2:] == '++'):
+				self.karma[who] += 1
+			if (text[-2:] == '--'):
+				self.karma[who] -= 1
+			if (self.karma[who] == 0):
+				del self.karma[who]
+			# Save definition in file
+			try:
+				f = open(self.karma_file, 'w')
+				pickle.dump(self.karma, f)
+				f.close()
+			except:
+				print 'Unable to save karma for %s' % who
+		else:
+		    pass
+
 	def do_privmsg(self, m):
 		""" Handles private message """
 		recipient, text = m.params
@@ -169,30 +192,15 @@ class jibot(irclib.irc):
 				print '<%s:%s> %s\n' % (self.sendernick, recipient, text)
 			elif (text[-2:] == '++' or text[-2:] == '--'):
 				# Karma
-				who = string.lower(text[:-2])
+				words = text.split()
+				who = words[-1][:-2].lower()
 				if (len(who) > 16):
 					#self.say('That\'s a lengthy nick, Dave. Ignoring.')
 					pass
-				elif (len(who) > 0):
-					if (self.karma.has_key(who)):
-						pass
-					else:
-						self.karma[who] = 0
-					if (text[-2:] == '++'):
-						self.karma[who] += 1
-					if (text[-2:] == '--'):
-						self.karma[who] -= 1
-					if (self.karma[who] == 0):
-						del self.karma[who]
-					# Save definition in file
-					try:
-						f = open(self.karma_file, 'w')
-						pickle.dump(self.karma, f)
-						f.close()
-						#self.say('%s has %d points now' % (who, self.karma[who]))
-						# self.say('Quite honestly, I wouldn\'t worry myself about that.')
-					except:
-						print 'Unable to save karma for %s' % who
+				else:
+					self.handle_karma(who, words[-1])
+					#self.say('%s has %d points now' % (who, self.karma[who]))
+					#self.say('Quite honestly, I wouldn\'t worry myself about that.')
 		else:
 			print '[%s]' % self.sendernick, 'to (%s)' % recipient,
 			print text
