@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.29 $"[11:-2]
-__date__ = "$Date: 2003/07/06 10:52:36 $"[7:-2]
+__cvsversion__ = "$Revision: 1.30 $"[11:-2]
+__date__ = "$Date: 2003/07/07 08:46:19 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -44,7 +44,7 @@ class jibot(irclib.irc):
 		username  = getenv('USER') or 'jibot'
 		server = getenv('IRSERVER') or 'irc.freenode.net'
 		channel = getenv('IRCCHANNEL') or '#joiito'
-		
+		self.herald = 1
 		# Connects to the IRC server and joins the channel
 		self.connect(server)
 		self.send(irclib.msg(
@@ -77,15 +77,17 @@ class jibot(irclib.irc):
 		except:
 			self.karma = dict()
 		
-		# Load nicks from file
+		# Load nick aliases from file
 		self.nick_file = 'jibot.nicks'
 		try:
 			f = open(self.nick_file, 'r')
-			self.nicks = pickle.load(f)
+			self.nickaka = pickle.load(f)
 			f.close()
 		except:
-			self.nicks = dict()
-		
+			self.nickaka = dict()
+		#nickaka keeps track of name chnages
+		#nicks is the current users
+		self.nicks = dict()
 	def do_join(self, m):
 		""" /join #m """
 		self.send(irclib.msg(command='JOIN', params=[ self.curchannel ]))
@@ -144,10 +146,16 @@ class jibot(irclib.irc):
 		elif (m.command == 'NICK'):
 			nick = m.params[-1]
 			self.nicks[nick] = nick
-			del self.nicks[string.split(m.prefix, '!')[0]]
+			oldnick = string.split(m.prefix, '!')[0]
+			del self.nicks[oldnick]
+			if (self.herald):
+				if (self.definitions.has_key(string.lower(nick)) and (not self.definitions.has_key(string.lower(oldnick)))):
+					self.cmd_def(nick)
 		elif (m.command == 'JOIN'):
 			nick = string.split(m.prefix, '!')[0]
 			self.nicks[nick] = nick
+			if (self.herald):
+				self.cmd_def(nick)
 		elif (m.command == 'QUIT'):
 			del self.nicks[string.split(m.prefix, '!')[0]]
 			print '%s quit' %(string.split(m.prefix, '!')[0])
@@ -309,6 +317,15 @@ class jibot(irclib.irc):
 		self.say('Karma: nick++ || nick-- || ?karma nick || ?karma')
 		self.say('User list: ?introduce')
 	
+	def cmd_herald(self, m):
+		if (self.herald):
+			self.herald = 0
+			self.say('stopped heralding')
+		else:
+			self.herald = 1
+			self.say('started heralding')
+		
+
 	def cmd_info(self, m):
 		""" Display """
 		if (m == ""):
@@ -545,7 +562,9 @@ class jibot(irclib.irc):
 		if (self.definitions.has_key(concept)):
 			self.say('%s is %s' % (m, " and ".join(self.definitions[concept])))
 		else:
-			self.say('It\'s puzzling, I don\'t think I\'ve ever seen anything quite like %s before' % (m))
+			unknownphrases = ("It's puzzling, I don't think I've ever seen anything like %s before","No-one has dished the dirt on %s yet",
+			"Perhaps if %s makes friends with jeannie I'll say something nice next time", "Are you new here, %s?","Is %s a pseudonym?")
+			self.say(unknownphrases[int(random.random() *len(unknownphrases))] %(m))
 
 	def cmd_introduce(self, m):
 		""" Introductions """
