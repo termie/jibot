@@ -16,15 +16,15 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.84 $"[11:-2]
-__date__ = "$Date: 2003/12/13 02:47:19 $"[7:-2]
+__cvsversion__ = "$Revision: 1.85 $"[11:-2]
+__date__ = "$Date: 2003/12/17 07:53:24 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
 import cPickle as pickle
 #from Crypto.Hash import MD5
 
-import technorati, google, amazon
+import technorati, google, amazon, jargon
 import irclib, rssparser
 
 class jibot(irclib.irc):
@@ -1130,6 +1130,14 @@ class jibot(irclib.irc):
 					self.say("On %s's least favorites list: %s" % (self.sendernick, ",".join(self.disfavorites)))
 		else:
 			self.say('I can only do that in a channel.')
+
+	def cmd_jargon(self,m):
+		"""Does a lookup in the jargon dictionary."""
+		if m == "":
+			return ""
+		else:
+			self.say(jargon.find(m))
+		
 
 if __name__ == '__main__':
 	bot = jibot()
