@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.23 $"[11:-2]
-__date__ = "$Date: 2003/06/22 08:56:42 $"[7:-2]
+__cvsversion__ = "$Revision: 1.24 $"[11:-2]
+__date__ = "$Date: 2003/06/22 09:29:04 $"[7:-2]
 
 import string, sys, os, re
 import random, time
@@ -533,7 +533,10 @@ class jibot(irclib.irc):
 		if (m == ""):
 			pass
 		else:
-			message = "Jibot agrees that " + m
+			if (m == "Joi is a fool"):
+				message = "Jibot does not agree."
+			else:
+			        message = "Jibot agrees that " + m
 			self.say(message)
 			
 	def cmd_karma(self, m):
