@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.69 $"[11:-2]
-__date__ = "$Date: 2003/12/05 02:08:11 $"[7:-2]
+__cvsversion__ = "$Revision: 1.70 $"[11:-2]
+__date__ = "$Date: 2003/12/05 02:22:42 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -156,7 +156,14 @@ class jibot(irclib.irc):
 			f.close()
 		except:
 			self.disfavorites = []
-		
+
+	# Pluralize a word (english-centric, for now)
+	def pl(self, word, n):
+		if not n == 1:
+			return word + 's'
+		else:
+			return word
+	
 	def do_join(self, m):
 		""" /join #m """
 		self.send(irclib.msg(command = 'JOIN', params = [ self.curchannel ]))
@@ -866,7 +873,8 @@ class jibot(irclib.irc):
 			words = m.split()
 			nick = words[0]
 			try:
-				self.say('%s has %s points' % (nick, self.karma[nick.lower()]))
+				k = self.karma[nick.lower()]
+				self.say('%s has %s %s' % (nick, k, self.pl('point', k)))
 			except:
 				self.say('%s has no karma points' % nick)
 	def cmd_blog(self, m):
