@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.24 $"[11:-2]
-__date__ = "$Date: 2003/06/22 09:29:04 $"[7:-2]
+__cvsversion__ = "$Revision: 1.25 $"[11:-2]
+__date__ = "$Date: 2003/06/22 23:27:28 $"[7:-2]
 
 import string, sys, os, re
 import random, time
@@ -530,14 +530,17 @@ class jibot(irclib.irc):
 		self.say('Joi has just learned how to use cvs.')
 
 	def cmd_assert(self, m):
+		""" Joi's first command """
 		if (m == ""):
 			pass
 		else:
 			if (m == "Joi is a fool"):
-				message = "Jibot does not agree."
+				self.say("Jibot does not agree.")
+			elif (m == "Technobot is the ruler of all #joiito bots."):
+				self.say("Technobot needs ego.")
+				self.say("fussbot++")
 			else:
-			        message = "Jibot agrees that " + m
-			self.say(message)
+				self.say("Jibot agrees with %s that %s" % (self.sendernick, m))
 			
 	def cmd_karma(self, m):
 		if (m == ""):
