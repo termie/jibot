@@ -927,7 +927,7 @@ class SystemHandler(MessageHandler):
     def handle(self,m):
         MessageHandler.handle(self,m)
         if "help" == m.cmd:
-            self.cmd_help(m)
+            self.cmd_help(m,m.rest)
             return True
         elif m.sender_nick not in self._root.owners:
             self._root.say_only_owners(m)
@@ -961,13 +961,17 @@ class SystemHandler(MessageHandler):
         self._root.quit("Planned Shutdown")
         return True
         
-    def cmd_help(self, m):
+    def cmd_help(self,m,nick):
         # I would like to make this targettable and only responding 
         # in private messages, a la: ?help termie
         # which would send the help message to termie, or the sender if
         # no target is specified
         """ Show commands """
         """ FIXME: this needs to understand potential other cmd chars. """
+        if 0 < len(nick) and '#' != nick[0]:
+            self._root.set_cur_channel(nick)
+        else:
+            self._root.set_cur_channel(m.sender_nick)
         self._root.say('JiBot - #JoiIto\'s bot - http://joi.ito.com/joiwiki/JiBot')
         self._root.say('Dictionary and user info: ?learn concept is definition || ?whois concept || ?whatis concept ||?forget concept is definition || ?forgetme')
         self._root.say('Technorati: ?info blog.com || ?last blog.com || ?cosmos blog.com || ?blogrep keywords')
