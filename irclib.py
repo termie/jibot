@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-# $Id: irclib.py,v 1.1 2003/06/09 17:23:19 vrruiz Exp $
+# $Id: irclib.py,v 1.2 2003/10/08 23:35:17 kevinmarks Exp $
 
 
 '''
@@ -228,7 +228,7 @@ class IrcMessage:
     ''', re.VERBOSE | re.MULTILINE | re.DOTALL)
 
     def from_string(self, buf):
-        # print 'from_string: %s' % repr(buf)
+        print 'from_string: %s' % repr(buf)
         mo = self.msgexp.match(buf)
         if mo is None:
             raise MalformedMessageError, \
