@@ -441,7 +441,7 @@ class NickHandler(MessageHandler):
             return True
         else:
             if "forgetnick" == m.cmd:
-                if m.private: 
+                if m.private and not m.identified: 
                     self._root.say_no_private(m)
                 else:
                     self.cmd_forgetnick(m)
@@ -503,11 +503,17 @@ class NickHandler(MessageHandler):
             
     def cmd_savenicks(self,m):
         if m.sender_nick in self._root.owners:
-            self._aliasDB.flush()
-            self._masternickDB.flush()
-            self._root.say("Nicks saved")
+            if self._root.check_identification and not m.identified:
+                self._root.say_only_owners(m)
+                return False
+            else:
+                self._aliasDB.flush()
+                self._masternickDB.flush()
+                self._root.say("Nicks saved")
+                return True
         else:
             self._root.say_only_owners(m)
+            return False
     
     def add_nick(self, nick):
         lc_nick = nick.lower()
@@ -575,11 +581,14 @@ class FavorHandler(MessageHandler):
     
     def handle(self,m):
         MessageHandler.handle(self,m)
-        if m.private:
-            self._root.say_no_private(m)
+        if self._root.check_identification and not m.identified:
+            self.say_queen_only(m)
             return True
         if self.queen.lower() != m.sender_nick.lower():
             self.say_queen_only(m)
+            return True
+        if m.private and not m.identified:
+            self._root.say_no_private(m)
             return True
         nick = m.rest
         if "favor" == m.cmd:
@@ -599,8 +608,12 @@ class FavorHandler(MessageHandler):
             return True
         elif "savefavors" == m.cmd:
             if m.sender_nick in self._root.owners:
-                self.cmd_savefavors(m)
-            return True
+                if self._root.check_identification and not m.identified:
+                    self._root.say_only_owners(m)
+                    return False
+                else:
+                    self.cmd_savefavors(m)
+                    return True
         else:
             return False
     
@@ -646,9 +659,13 @@ class FavorHandler(MessageHandler):
 
     def cmd_savefavors(self,m):
         if m.sender_nick in self._root.owners:
-            self._favorDB.flush()
-            self._root.say("Favors saved")
-            return True
+            if self._root.check_identification and not m.identified:
+                self._root.say_only_owners(m)
+                return False
+            else:
+                self._favorDB.flush()
+                self._root.say("Favors saved")
+                return True
         else:
             self._root.say_only_owners(m)
             return False
@@ -671,12 +688,15 @@ class HeraldHandler(MessageHandler):
     def handle(self,m):
         MessageHandler.handle(self,m)
         if "heraldme" == m.cmd:
-            if self._heraldDB.get_herald_nick(m.sender_nick):
-                self._heraldDB.set_herald_nick(m.sender_nick, False)
-                self._root.say("Now heralding your full definition")
+            if m.private and not m.identified:
+                self._root.say_no_private(m)
             else:
-                self._heraldDB.set_herald_nick(m.sender_nick, True)
-                self._root.say("Now heralding only your first definition")
+                if self._heraldDB.get_herald_nick(m.sender_nick):
+                    self._heraldDB.set_herald_nick(m.sender_nick, False)
+                    self._root.say("Now heralding your full definition")
+                else:
+                    self._heraldDB.set_herald_nick(m.sender_nick, True)
+                    self._root.say("Now heralding only your first definition")
         elif "herald" == m.cmd:
             if self._herald: 
                 self.set_herald(False)
@@ -814,9 +834,13 @@ class DefHandler(MessageHandler):
     
     def cmd_savedefs(self,m):
         if m.sender_nick in self._root.owners:
-            self._defDB.flush()
-            self._root.say("Definitions saved")
-            return True
+            if self._root.check_identification and not m.identified:
+                self._root.say_only_owners(m)
+                return False
+            else:
+                self._defDB.flush()
+                self._root.say("Definitions saved")
+                return True
         else:
             self._root.say_only_owners(m)
             return False
@@ -924,9 +948,13 @@ class KarmaHandler(MessageHandler):
     
     def cmd_savekarmas(self,m):
         if m.sender_nick in self._root.owners:
-            self._karmaDB.flush()
-            self._root.say("Karmas saved")
-            return True
+            if self._root.check_identification and not m.identified:
+                self._root.say_only_owners(m)
+                return False
+            else:
+                self._karmaDB.flush()
+                self._root.say("Karmas saved")
+                return True
         else:
             self._root.say_only_owners(m)
             return False
@@ -947,6 +975,9 @@ class SystemHandler(MessageHandler):
         elif m.sender_nick not in self._root.owners:
             self._root.say_only_owners(m)
             return True
+        elif self._root.check_identification and not m.identified:
+            self._root.say_only_owners(m)
+            return False
         elif "quit" == m.cmd:
             self.cmd_quit(m,m.rest)
             return True
