@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.27 $"[11:-2]
-__date__ = "$Date: 2003/07/04 04:42:36 $"[7:-2]
+__cvsversion__ = "$Revision: 1.28 $"[11:-2]
+__date__ = "$Date: 2003/07/05 21:42:10 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -36,7 +36,7 @@ class jibot(irclib.irc):
 		self.curchannel = None
 		self.wannaquit = 0
 		irclib.irc.__init__(self)
-		
+		#self.debug = 1
 		# Variable declarations
 		getenv = os.environ.get
 		ircname = getenv('IRCNAME') or 'Python #joiito\'s bot'
@@ -53,7 +53,7 @@ class jibot(irclib.irc):
 		self.send(irclib.msg(command='NICK', params = [ self.nick ]))
 		self.send(irclib.msg(command='JOIN', params=[ channel ]))
 		self.curchannel = channel
-		
+		print 'done joining'
 		
 		
 		# Load definitions from file
@@ -77,6 +77,15 @@ class jibot(irclib.irc):
 		except:
 			self.karma = dict()
 		
+		# Load nicks from file
+		self.nick_file = 'jibot.nicks'
+		try:
+			f = open(self.nick_file, 'r')
+			self.nicks = pickle.load(f)
+			f.close()
+		except:
+			self.nicks = dict()
+		
 	def do_join(self, m):
 		""" /join #m """
 		self.send(irclib.msg(command='JOIN', params=[ self.curchannel ]))
@@ -91,6 +100,7 @@ class jibot(irclib.irc):
 		recipient, text = m.params
 		sender = m.prefix
 		self.sendernick = string.split(sender, '!')[0]
+
 		if recipient[0] not in irclib.NICKCHARS:
 			if (text[0] == '?'):
 				self.channel_cmd(text)
@@ -98,8 +108,8 @@ class jibot(irclib.irc):
 			elif (text[-2:] == '++' or text[-2:] == '--'):
 				# Karma
 				who = string.lower(text[:-2])
-				if (len(who) > 12):
-					self.say('That\'s a lenghty nick, Dave.')
+				if (len(who) > 16):
+					self.say('That\'s a lengthy nick, Dave. Ignoring.')
 				elif (len(who) > 0):
 					if (self.karma.has_key(who)):
 						pass
@@ -125,8 +135,15 @@ class jibot(irclib.irc):
 			print text
 
 	def do_any(self, m):
-		print "%s - %s " % (m.command, "/".join(m.params))
-
+		if (m.command == '353'):
+			list = m.params[-1].split()
+			
+			for nick in list:
+				self.nicks[nick] = nick
+			print self.nicks
+		else:
+			print "%s - %s " % (m.command, "/".join(m.params))
+		
 	def do_default(self, m):
 		""" Default """
 		if m.prefix:
@@ -277,6 +294,7 @@ class jibot(irclib.irc):
 		self.say('Amazon: ?amazon words || ?isbn ISBN')
 		self.say('Google: ?google words')
 		self.say('Karma: nick++ || nick-- || ?karma nick || ?karma')
+		self.say('User list: ?introduce')
 	
 	def cmd_info(self, m):
 		""" Display """
@@ -518,16 +536,10 @@ class jibot(irclib.irc):
 
 	def cmd_introduce(self, m):
 		""" Introductions """
-		self.say('Excuse me, Joi Ito has ordered me (yes, really!) to say this:')
-		self.say('dsifry, who doesn\'t seem to be at his computer is the Technorati guy')
-		self.say('Kevin Burton, the newsmonster guy')
-		self.say('Pete is the flash guy. ;-)')
-		self.say('<femtoid> Flash guy?')
-		self.say('Pete is captain flash.')
-		self.say('rvr is Victor Ruiz')
-		self.say('Kevin Marks is away, but he\'s the limericks guy.')
-		self.say('And datum is a stupid bot. I\'m better. Of course.')
-		self.say('Joi has just learned how to use cvs.')
+		for k,v in self.nicks.items():
+			if (self.definitions.has_key(k)):
+				self.say('%s is %s' % (k, " and ".join(self.definitions[k])))
+
 
 	def cmd_assert(self, m):
 		""" Joi's first command """
