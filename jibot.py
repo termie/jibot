@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.76 $"[11:-2]
-__date__ = "$Date: 2003/12/07 15:10:38 $"[7:-2]
+__cvsversion__ = "$Revision: 1.77 $"[11:-2]
+__date__ = "$Date: 2003/12/08 10:24:30 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -170,9 +170,10 @@ class jibot(irclib.irc):
 			self.disfavorites = []
 
 	# Pluralize a word (english-centric, for now)
-	def pl(self, word, n):
+	def pl(self, word, n, s):
+		suffix = s or 's'
 		if not n == 1:
-			return word + 's'
+			return word + suffix
 		else:
 			return word
 	
@@ -826,12 +827,19 @@ class jibot(irclib.irc):
 				if (self.NickAka.has_key(lcOldNick)):
 					if (self.NickAka[lcNick] == self.NickAka[lcOldNick]):
 						nicklist = (self.masternicks[self.NickAka[lcNick]])['nicklist']
+						removed = 0
 						for nick in nicklist:
 							if (string.lower(nick) == lcOldNick):
 								nicklist.remove(nick)
+								removed = removed + 1
 						del self.NickAka[lcOldNick] #remove mapping
 						self.addnick(oldNick) #make clean mapping - ie fresh masternicks
 						self.saveNicks()
+
+						if (removed > 0):
+							self.say("Forgot %s %s for %s" % (removed, self.pl('alias', removed, 'es'), self.sendernick))
+						else:
+							self.say("%s not found for %s" % (self.pl('Alias', len(nicklist), 'es'), self.sendernick))
 					else:
 						self.say("%s is not an alias for %s" % (oldNick,self.sendernick))
 				else:
