@@ -424,8 +424,11 @@ class NickHandler(MessageHandler):
             self._root.set_cur_channel(m.params[0])
             nick=m.sender_nick()
             self._cur_nicks[nick.lower()]=nick
-            self.add_nick(nick.lower())
-            self._heraldHandler.say_herald(nick)
+            if not self._aliasDB.has_key(nick):
+                self.add_nick(nick.lower())
+                self._heraldHandler.say_herald_unknown(nick)
+            else:
+                self._heraldHandler.say_herald(nick)
             return True
         elif (m.command == 'QUIT') or (m.command == 'PART'):
             old_nick = m.sender_nick()
@@ -703,13 +706,7 @@ class HeraldHandler(MessageHandler):
                 # replace with log: print "no lasttime for %s" % m
                 pass
 
-            if not self._defDB.has_def(nick) and not self._defDB.has_def(self._aliasDB.get(nick)):
-                unknownphrases = ( \
-                    "Welcome, %s; is this your first time here?", \
-                    "Willkommen, bienvenue, welcome %s, im Cabaret, au Cabaret, to Cabaret", \
-                    "Milords, Ladies and Gentlemen, please welcome %s")
-                self._root.say(unknownphrases[int(random.random() *len(unknownphrases))] %(nick))
-            elif not self._defDB.has_def(nick) and self._defDB.has_def(self._aliasDB.get(nick)):
+            if not self._defDB.has_def(nick) and self._defDB.has_def(self._aliasDB.get(nick)):
                 master_nick = self._aliasDB.get(nick)
                 if self._heraldDB.get_herald_nick(master_nick):
                     self._root.say("%s is aka %s; %s is %s"%(nick,master_nick,master_nick,self._defDB.get_def(master_nick,end=1,join=True)))
@@ -724,6 +721,13 @@ class HeraldHandler(MessageHandler):
                 self._favorHandler.say_favor(nick)
             self.set_last_herald(nick)
     
+    def say_herald_unknown(self,nick):
+        unknownphrases = ( \
+                    "Welcome, %s; is this your first time here?", \
+                    "Willkommen, bienvenue, welcome %s, im Cabaret, au Cabaret, to Cabaret", \
+                    "Milords, Ladies and Gentlemen, please welcome %s")
+        self._root.say(unknownphrases[int(random.random() *len(unknownphrases))] %(nick))
+    
     def get_last_herald(self,nick):
         # This is changed from the previous way of handling last herald
         # in that it just holds the last herald list in memory, as there
@@ -732,7 +736,7 @@ class HeraldHandler(MessageHandler):
         # before the bot crash, so it isn't worth writing it to the db
         # The only reason to hold that data would be for reference as to
         # a ".seen" sort of functionality, and that can be added somewher else
-        master_nick = self._aliasDB.get(nick.lower(),nick.lower())
+        master_nick = self._aliasDB.get(nick,nick.lower())
         try:
             return self._last_herald[master_nick]
         except:
@@ -740,7 +744,8 @@ class HeraldHandler(MessageHandler):
         
     def set_last_herald(self,nick):
         cur_time = time.time()
-        self._last_herald[nick.lower()]=cur_time
+        master_nick = self._aliasDB.get(nick,nick.lower())
+        self._last_herald[master_nick]=cur_time
         self._herald_timestamp=cur_time
 
 
