@@ -1,0 +1,14 @@
+INSTALL
+-------
+
+jibot needs Python > 2.x
+
+From http://diveintomark.org/projects/ download the following
+libraries:
+
+	- PyTechnorati
+	- PyAmazon
+	- PyGoogle
+	- RSS Parser
+
+You need Technorati, Amazon and Google application keys.

@@ -1,0 +1,12 @@
+CHANGES
+-------
+
+2003-06-09
+	- Added technorati search command
+
+2003-06-08
+	- technorati.py replaced by Pilgrim's one at Joi Ito's request ;)
+	- Reconnection loop
+	- Help command added
+	- Amazon search by keywords command added
+	- Amazon search by ISBN command added

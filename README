@@ -1,0 +1,18 @@
+STARTING THE BOT
+----------------
+
+	Unix: $ python jibot.py
+	Windows: C:\> start jibot.py
+
+	
+ADDING COMMANDS
+---------------
+
+It is easy to add new commands to the bot. Just modify the jibot class
+and add a cmd_command_name function. Must have a parameter:
+
+	def cmd_hello(self, m):
+		self.say('Hello')
+	
+	<rvr> ?hello
+	<jibot> Hello

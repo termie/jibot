@@ -1,39 +1,15 @@
 #!/usr/bin/python2.2
 
-"""
-COPYRIGHT
----------
-
-jibot - #joiito's IRC bot 
-	GPL - (C) 2003 Víctor R. Ruiz <rvr@infoastro.com>
-
-Contributors
-	Kevin Marks < http://epeus.blogspot.com/ >
-
-This script is based in simpleclient.py
-	GPL - (C) 1999  Erno Kuusela <erno@iki.fi> 
+#	jibot - #joiito's IRC bot 
+#		(C) 2003 Víctor R. Ruiz <rvr@infoastro.com>
+#
+#	Contributors
+#		Kevin Marks < http://epeus.blogspot.com/ >
+#
+#	This script is based in simpleclient.py
+#		(C) 1999  Erno Kuusela <erno@iki.fi> 
 
 	
-STARTING THE BOT
-----------------
-Install Python > 2.2
-
-	Unix: $ python jibot.py
-	Windows: C:\> start jibot.py
-
-	
-ADDING COMMANDS
----------------
-
-It is easy to add new commands to the bot. Just modify the jibot class
-and add a cmd_command_name function. Must have a parameter:
-
-	def cmd_hello(self, m):
-		self.say('Hello')
-	
-	<rvr> ?hello
-	<jibot> Hello
-
 
 TODO
 ----
@@ -41,27 +17,14 @@ TODO
 - Jargon interface
   http://scripts.incutio.com/xmlrpc/jargon-file-with-python.php
 
-CHANGES
--------
-2003-06-09
-	- Added technorati search command
-
-2003-06-08
-	- technorati.py replaced by Pilgrim's one at Joi Ito's request ;)
-	- Reconnection loop
-	- Help command added
-	- Amazon search by keywords command added
-	- Amazon search by ISBN command added
-
-"""
 
 __author__ = "Victor R. Ruiz <rvr@infoastro.com>"
 __contributors__ = ['Kevin Marks']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.3"
-__cvsversion__ = "$Revision: 1.1 $"[11:-2]
-__date__ = "$Date: 2003/06/09 17:23:06 $"[7:-2]
+__cvsversion__ = "$Revision: 1.2 $"[11:-2]
+__date__ = "$Date: 2003/06/09 21:46:36 $"[7:-2]
 
 import string, sys, os, re
 import random, time
