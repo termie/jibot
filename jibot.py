@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.59 $"[11:-2]
-__date__ = "$Date: 2003/11/19 21:22:11 $"[7:-2]
+__cvsversion__ = "$Revision: 1.60 $"[11:-2]
+__date__ = "$Date: 2003/12/01 00:27:37 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -482,7 +482,7 @@ class jibot(irclib.irc):
 		self.say('JiBot - #JoiIto\'s bot - http://joi.ito.com/joiwiki/JiBot')
 		self.say('Dictionary and user info: ?learn concept is definition || ?whois concept || ?whatis concept')
 		self.say('Technorati: ?info blog.com || ?last blog.com || ?cosmos blog.com || ?search keywords')
-		self.say('Amazon: ?amazon words || ?isbn ISBN')
+		self.say('Amazon: ?amazon words || ?asin ASIN || ?isbn ISBN')
 		self.say('Google: ?google words')
 		self.say('Karma: nick++ || nick-- || ?karma nick || ?karma')
 		self.say('Turn on or off heralding: ?herald')
@@ -649,8 +649,8 @@ class jibot(irclib.irc):
 		except:
 			self.say('I cannot search %s. There are some extremely odd things about this mission.' % (m))
 			
-	def cmd_isbn(self, m):
-		""" Search ISBN in Amazon """
+	def cmd_asin(self, m):
+		""" Search ASIN in Amazon """
 		if (m == ""):
 			return
 		try:
@@ -672,6 +672,9 @@ class jibot(irclib.irc):
 			
 		except:
 			self.say('I cannot search %s. Sorry about this. I know it\'s a bit silly.' % (m))
+
+	def cmd_isbn(self, m):
+		self.cmd_asin(m)
 	
 	def cmd_learn(self, m):
 		""" Learn a definition """
