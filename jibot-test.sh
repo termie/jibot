@@ -1,2 +1,2 @@
 #!/bin/sh
-./JibotLaunch.py -vv -c jibtest.conf
+./JibotLaunch.py -vv -c jibot-test.conf
