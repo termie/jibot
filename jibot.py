@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.44 $"[11:-2]
-__date__ = "$Date: 2003/08/31 06:46:12 $"[7:-2]
+__cvsversion__ = "$Revision: 1.45 $"[11:-2]
+__date__ = "$Date: 2003/09/04 03:07:37 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -697,6 +697,21 @@ class jibot(irclib.irc):
 					self.say("%s is not an alias for %s" % (oldNick,self.sendernick))
 			else:
 				self.say("%s is not an nick I know" % (oldNick))
+
+	def cmd_forgetme(self,m):
+		""" Forget my nick's definition """
+		concept = string.lower(self.sendernick)
+		if (not self.definitions.has_key(concept)):
+			self.say('I don\'t know about \'%s\' ' % concept)
+			return;
+		del self.definitions[concept]
+		self.say('I have expunged %s from my mind' % (concept))
+		try:
+			f = open(self.def_file, 'w')
+			pickle.dump(self.definitions, f)
+			f.close()
+		except:
+			pass
 
 	def cmd_forget(self, m):
 		""" Forget a definition """
