@@ -28,20 +28,45 @@ class JibotInterface:
         self.bots = self._config.get("global","bots").split(",")
         self.bots_ignore = self._config.getboolean("global","bots_ignore")
         self.owners = self._config.get("global","owners").split(",")
+        self.check_identification = config.getboolean("global","check_identification")
+        self.identify = config.getboolean("global","identify")
+        self.identify_key_file = config.get("global","identify_key_file")
         self._should_quit = False
         self._has_quit = False
         self.sanitizer = re.compile("[\x00-\x19\x7F-\xFF]") #done early as it
                                                             #will be used many
                                                             #times
-   
+        if self.identify:
+            filename = os.path.join(os.getcwd(),self.identify_key_file)
+            if os.path.exists(filename):
+                f = open(filename)
+                self._identify_password = f.read().strip()
+                f.close()
+                self.logger.info("Indentify password loaded successfully")
+            else:
+                self.logger.warn("Could not load identify password")
+                self.identify = False
+    
     def start(self):
         self.connect(self.server,self.port)
         self.send(JibotMessage(root=self,
                                command='USER',
                                params=[self.user,'localhost','localhost',self.ircname]))
+        self.logger.info("Sending NICK %s"%(self.nick))
         self.send(JibotMessage(root=self,
                                command='NICK',
                                params=[self.nick]))
+        if self.check_identification:
+            self.logger.info("Sending QUOTE CAPAB IDENTIFY-MSG")
+            self.send(JibotMessage(root=self,
+                                   command='CAPAB',
+                                   params=['IDENTIFY-MSG']))
+        if self.identify:
+            self.logger.info("Sending identify to NickServ")
+            self.send(JibotMessage(root=self,
+                                   command='PRIVMSG',
+                                   params=['NickServ',"IDENTIFY %s"%(self._identify_password)]))
+            
         for channel in self.channels:
             self.join("#"+channel)
         
@@ -209,6 +234,7 @@ class JibotMessage(irclib.IrcMessage):
         self.private = False
         self.ignore = False
         self.cmd = None
+        self.identified = False
 
     def parse(self,line):
         self.from_string(line)
@@ -229,6 +255,9 @@ class JibotMessage(irclib.IrcMessage):
             else:
                 self.channel = self.recipient
                 self.private = False
+            if self._root.check_identification:
+                if self.text[0] == '+': self.identified=True
+                self.text = self.text[1:]
             self.cmd, self.rest = self.get_cmd(self.text)
             self._root.set_cur_channel(self.channel)
        
