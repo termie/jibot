@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.52 $"[11:-2]
-__date__ = "$Date: 2003/09/22 07:30:39 $"[7:-2]
+__cvsversion__ = "$Revision: 1.53 $"[11:-2]
+__date__ = "$Date: 2003/09/29 20:16:16 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -104,8 +104,9 @@ class jibot(irclib.irc):
 			self.masternicks = dict()		
 		#NickAka keeps track of name changes by mapping from nick to master nick - a simple dictionary
 		#masternicks has the info mapping from nick ID to list of related ones and master nick
-		#dictioanry containing a dictionary with entries amsternick and nickList
+		#dictionary containing a dictionary with entries masternick and nickList
 		#nicks is the current users
+		# NOTE nicks shooudl be per channel now; which it isn't.
 		self.nicks = dict()
 
 		self.favorites_file = 'jibot.favorites'
@@ -179,6 +180,7 @@ class jibot(irclib.irc):
 		lcNick =string.lower(nick)
 		if (not self.NickAka.has_key(lcNick)):
 			self.NickAka[lcNick] = lcNick
+		if not self.masternicks.has_key(lcNick):
 			self.masternicks[lcNick] =dict()
 			(self.masternicks[lcNick])['nicklist']=[nick]
 		#print "nick aka:", self.NickAka
@@ -186,6 +188,7 @@ class jibot(irclib.irc):
 		
 	def addnickalias(self, nick, aliasnick):
 		self.addnick(nick)
+		self.addnick(aliasnick)
 		lcNick =string.lower(nick)
 		lcNickAka =string.lower(aliasnick)
 		nickMaster = self.NickAka[lcNick]
