@@ -15,8 +15,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.19 $"[11:-2]
-__date__ = "$Date: 2003/06/17 10:25:37 $"[7:-2]
+__cvsversion__ = "$Revision: 1.20 $"[11:-2]
+__date__ = "$Date: 2003/06/19 07:02:16 $"[7:-2]
 
 import string, sys, os, re
 import random, time
@@ -272,9 +272,9 @@ class jibot(irclib.irc):
 		""" Show commands """
 		self.say('JiBot - #JoiIto\'s bot - http://joi.ito.com/joiwiki/JiBot')
 		self.say('Dictionary: ?learn concept is definition || ?def concept')
-		self.say('Technorati: ?info blog.com || ?last blog.com')
+		self.say('Technorati: ?info blog.com || ?last blog.com || ?cosmos blog.com || ?search keywords')
 		self.say('Amazon: ?amazon words || ?isbn ISBN')
-		self.say('Google: ?search words')
+		self.say('Google: ?google words')
 		self.say('Karma: nick++ || nick-- || ?karma nick || ?karma')
 	
 	def cmd_info(self, m):
@@ -336,6 +336,35 @@ class jibot(irclib.irc):
 		except:
 			self.say('Technorati took exception to \'%s\' ' % (m))
 			
+
+	def cmd_cosmos(self, m):
+		""" Tchnorati cosmos """
+		if (m == ""):
+			return
+		try:
+			search = technorati.cosmos(m)
+			if (len(search.item) == 0):
+				# Any result
+				self.say('Technorati does not know anything about %s. Are you sure you are making the right decision?' % (m))
+				return
+			elif (len(search.item) > 3):
+				# More than three results, let's cut them
+				results = search.item[:3]
+			else:
+				results = search.item
+			self.say('Search for %s. Showing first %d of %d sites' % (m,  len(results), len(search.item)))
+			i = 0
+			while (i < len(results)) :
+				# Remove html tags
+				name = re.compile('(<p>|<br>)').sub(' ',results[i].name)
+				name = re.compile('<(.*?)>').sub('', name)
+				message = '%s - %s' % (name, results[i].url)
+				self.say(message.encode('ISO-8859-1'))
+				i += 1
+		except:
+			self.say('Technorati took exception to \'%s\' ' % (m))
+			
+
 	def cmd_google(self, m):
 		""" Query google """
 		if (m == ""):
