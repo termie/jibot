@@ -15,8 +15,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.17 $"[11:-2]
-__date__ = "$Date: 2003/06/16 23:56:02 $"[7:-2]
+__cvsversion__ = "$Revision: 1.18 $"[11:-2]
+__date__ = "$Date: 2003/06/17 08:30:02 $"[7:-2]
 
 import string, sys, os, re
 import random, time
@@ -53,15 +53,20 @@ class jibot(irclib.irc):
 		self.send(irclib.msg(command='JOIN', params=[ channel ]))
 		self.curchannel = channel
 		
+		
+		
 		# Load definitions from file
 		self.def_file = 'jibot.def'
 		try:
 			f = open(self.def_file, 'r')
 			self.definitions = pickle.load(f)
 			f.close()
+			for k, v in self.definitions.items():
+				if (type(v) == type('string')):
+					self.definitions[k] = v.split(" and ")
 		except:
 			self.definitions = dict()
-
+		
 		# Load karma from file
 		self.karma_file = 'jibot.kar'
 		try:
@@ -240,9 +245,13 @@ class jibot(irclib.irc):
 
 	""" 'Channel' commands """
 	def cmd_cool(self, m):
-		coolphrases = ('Cool? we keep drinks in %s', '%s is freezing over', 'Ice forms on %s\'s upper slopes')
+		coolphrases = ('Cool? we keep drinks in %s', '%s\'s undergarments are full of dry ice', 'ice forms on %s\'s upper slopes')
 		cool = coolphrases[int(random.random() *len(coolphrases))] % (m)
 		self.say(cool)
+
+	def cmd_shirt(self, m):
+		shirtphrases = ('%s would look supercilious in a blogging shirt http://cafeshops.com/jeanniecool', '%s is hot enough to carry off the \'too hot for friendster\' shirts http://cafeshops.com/frndster', 'I don\'t mean to get shirty, %s, but try http://cafeshops.com/mirandablog','Give up knitting, %s, try these on http://cafestores.com/beendoneblogged', 'Weblogs will fact-check %s\'s ... http://www.cafeshops.com/mirandablog.6314725')
+		self.say(shirtphrases[int(random.random() *len(shirtphrases))] % (m))
 
 	def cmd_knit(self, m):
 		self.say('%s picks up the knitting' % (m))
@@ -323,7 +332,7 @@ class jibot(irclib.irc):
 				self.say(message.encode('ISO-8859-1'))
 				i += 1
 		except:
-			self.say('I cannot search %s. I am aware of these facts.' % (m))
+			self.say('Technorati took exception to \'%s\' ' % (m))
 			
 	def cmd_google(self, m):
 		""" Query google """
@@ -349,6 +358,9 @@ class jibot(irclib.irc):
 				self.say(message)
 		except:
 			self.say('I cannot search %s. Dr. Chandra, I\'m ready to stop the countdown if you want.' % (m))
+
+	def cmd_blogrep(self, m):
+		self.cmd_search(m)
 
 	def cmd_amazon(self, m):
 		""" Search keywords in Amazon """
@@ -404,17 +416,19 @@ class jibot(irclib.irc):
 			return
 		words = m.split()
 		if (len(words) < 3):
-			self.say('?learn some-concept is Not-very-long-definition ;)')
+			self.say('I need at least 3 words with an \'is\' in the middle')
 			return
 		try:
 			pos = words.index('is') 
 		except:
-			self.say('?learn some-concept is Not-very-long-definition ;)')
+			self.say('I need an \'is\' in the middle')
 			return
 		
 		concept = string.lower(' '.join(words[:pos]))
 		definition = ' '.join(words[pos+1:])
-		self.definitions[concept] = definition
+		if (not self.definitions.has_key(concept)):
+			self.definitions[concept] = []
+		self.definitions[concept].append(definition)
 
 		try:
 			f = open(self.def_file, 'w')
@@ -424,14 +438,49 @@ class jibot(irclib.irc):
 		except:
 			pass
 
+	def cmd_forget(self, m):
+		""" Forget a definition """
+		if (m == ""):
+			return
+		words = m.split()
+		if (len(words) < 3):
+			self.say('I need at least 3 words with an \'is\' in the middle')
+			return
+		try:
+			pos = words.index('is') 
+		except:
+			self.say('I need an \'is\' in the middle')
+			return
+		
+		concept = string.lower(' '.join(words[:pos]))
+		definition = ' '.join(words[pos+1:])
+		if (not self.definitions.has_key(concept)):
+			self.say('I don\'t know about \'%s\' ' % concept)
+			return;
+		if(definition in self.definitions[concept]):
+			self.definitions[concept].remove(definition)
+		else:
+			self.say('I didn\'t know %s was %s' % (concept, definition))
+			return;
+		if (len(self.definitions[concept]) ==0):
+			del self.definitions[concept]
+		try:
+			f = open(self.def_file, 'w')
+			pickle.dump(self.definitions, f)
+			f.close()
+			dumbphrases = ('I am now a dumber bot','Dave, my mind is going...')
+			self.say(dumbphrases[int(random.random() *len(dumbphrases))])
+		except:
+			pass
 			
 	def cmd_def(self, m):
 		""" Display a stored definition """
 		if (m == ""):
+			[self.say("%s is %s" % (k, " and ".join(v))) for k, v in self.definitions.items()] 
 			return
 		concept = string.lower(m)
 		if (self.definitions.has_key(concept)):
-			self.say('%s is %s' % (m, self.definitions[concept]))
+			self.say('%s is %s' % (m, " and ".join(self.definitions[concept])))
 		else:
 			self.say('It\'s puzzling, I don\'t think I\'ve ever seen anything quite like %s before' % (m))
 
