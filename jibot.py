@@ -16,11 +16,11 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.25 $"[11:-2]
-__date__ = "$Date: 2003/06/22 23:27:28 $"[7:-2]
+__cvsversion__ = "$Revision: 1.26 $"[11:-2]
+__date__ = "$Date: 2003/07/03 06:49:11 $"[7:-2]
 
 import string, sys, os, re
-import random, time
+import random, time, xmlrpclib
 import cPickle as pickle
 #from Crypto.Hash import MD5
 
@@ -556,6 +556,16 @@ class jibot(irclib.irc):
 				self.say('%s has %s points' % (nick, self.karma[nick]))
 			except:
 				pass
+	def cmd_blog(self, m):
+		if (m == ""):
+			return
+		message = '%s\n%s' % (self.sendernick, m)
+		blog = xmlrpclib.Server('http://www.bloxus.com/RPC.php', verbose=1)
+		try:
+			if (blog.blogger.newPost('APPKEY', '21', 'jibot', 'jibotblog', message, 1)):
+				self.say('Posted.')
+		except:
+			self.say('I cannot blog.')
 
 if __name__ == '__main__':
 	while (1):
