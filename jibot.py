@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.36 $"[11:-2]
-__date__ = "$Date: 2003/08/01 07:36:08 $"[7:-2]
+__cvsversion__ = "$Revision: 1.37 $"[11:-2]
+__date__ = "$Date: 2003/08/07 03:03:28 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -32,11 +32,12 @@ class jibot(irclib.irc):
 
 	def __init__(self):
 		""" Constructor """
-		self.cmdchars = '?'
+		self.cmdchars = '~'
 		self.curchannel = None
 		self.wannaquit = 0
+		self.hasquit = 0
 		irclib.irc.__init__(self)
-		#self.debug = 1
+		self.debug = 1
 		# Variable declarations
 		getenv = os.environ.get
 		ircname = getenv('IRCNAME') or 'Python #joiito\'s bot'
@@ -44,6 +45,7 @@ class jibot(irclib.irc):
 		username  = getenv('USER') or 'jibot'
 		server = getenv('IRSERVER') or 'irc.freenode.net'
 		channel = getenv('IRCCHANNEL') or '#joiito'
+		self.owners = getenv('JIBOTOWNERS') or ['imajes','JoiIto','rvr', 'KevinMarks']
 		self.herald = 1
 		# Connects to the IRC server and joins the channel
 		self.connect(server)
@@ -115,7 +117,7 @@ class jibot(irclib.irc):
 		self.sendernick = string.split(sender, '!')[0]
 
 		if recipient[0] not in irclib.NICKCHARS:
-			if (text[0] == '?'):
+			if (text[0] == self.cmdchars):
 				self.channel_cmd(text)
 				print '<%s:%s> %s\n' % (self.sendernick, recipient, text)
 			elif (text[-2:] == '++' or text[-2:] == '--'):
@@ -232,6 +234,10 @@ class jibot(irclib.irc):
 			r, w, e = select.select([self], [], [])
 			if self in r:
 				self.do_one_msg()
+				
+			if (self.hasquit == 1):
+				break
+
 			##if (int(time.time()) % 5 == 0):
 			##	self.checklinks()
 			#if sys.stdin in r:
@@ -282,6 +288,31 @@ class jibot(irclib.irc):
 		self.send(m)
 		time.sleep(1.0)
 
+	def action(self, line):
+		""" performs an action on the channel (eg, /me foo) """
+		if not self.curchannel:
+			print '-- no current channel!'
+			return
+		line = string.rstrip(line)
+		line = '\001ACTION' + line + '\001'  
+		m = irclib.msg(command='PRIVMSG',
+			       params = [self.curchannel, line])
+		self.send(m)
+		time.sleep(1.5)
+
+	def quit(self, line):
+		""" quits the irc network """
+		""" some irc networks have this problem with early quits, to prevent
+		    bot attacks using the quit message, so we should probably check to see
+		    if the bot quit early, and if so, just send a msg rather than the
+		    quit line """
+		line = string.rstrip(line)
+		m = irclib.msg(command='QUIT',
+			       params = [line])
+		self.send(m)
+		time.sleep(1.5)
+		sys.exit()
+		
 	def get_next_word(self, s):
 		""" Next word """
 		foo = string.split(s, None, 1)
@@ -349,7 +380,7 @@ class jibot(irclib.irc):
 		self.say(shirtphrases[int(random.random() *len(shirtphrases))] % (m))
 
 	def cmd_knit(self, m):
-		self.say('%s picks up the knitting' % (m))
+		self.action('%s picks up the knitting' % (m))
 
 	def cmd_aka(self, m):
 		nick = string.lower(m)
@@ -377,6 +408,8 @@ class jibot(irclib.irc):
 		
 	def cmd_help(self, m):
 		""" Show commands """
+		""" FIXME: this needs to understand potential other cmd chars. """
+		
 		self.say('JiBot - #JoiIto\'s bot - http://joi.ito.com/joiwiki/JiBot')
 		self.say('Dictionary and user info: ?learn concept is definition || ?whois concept || ?whatis concept')
 		self.say('Technorati: ?info blog.com || ?last blog.com || ?cosmos blog.com || ?search keywords')
@@ -715,6 +748,16 @@ class jibot(irclib.irc):
 		except:
 			self.say('I cannot blog.')
 
+	def cmd_quit(self, m):
+		if (m == ""):
+			return
+		if (self.sendernick in self.owners): 
+			self.quit('%s told me to quit -- %s' % (self.sendernick, m))
+			self.hasquit = 1
+		else:
+			self.say("%s: you can't make me quit!" % (self.sendernick))
+		
+
 if __name__ == '__main__':
 	while (1):
 		try:
@@ -723,3 +766,7 @@ if __name__ == '__main__':
 			
 		except irclib.IrcNetworkError, msg:
 			print 'lost connection,', msg
+
+		except (bot.hasquit == 1):
+			print 'quit command used.'
+			sys.exit()
