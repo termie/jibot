@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.41 $"[11:-2]
-__date__ = "$Date: 2003/08/20 04:46:39 $"[7:-2]
+__cvsversion__ = "$Revision: 1.42 $"[11:-2]
+__date__ = "$Date: 2003/08/24 15:59:28 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -47,6 +47,7 @@ class jibot(irclib.irc):
 		username  = getenv('USER') or 'jibot'
 		server = getenv('IRSERVER') or 'irc.freenode.net'
 		channel = getenv('IRCCHANNEL') or '#joiito'
+		self.queen = 'jeanniecool'
 		self.owners = getenv('JIBOTOWNERS') or ['imajes','JoiIto','rvr', 'KevinMarks']
 		self.herald = 1
 		# Connects to the IRC server and joins the channel
@@ -102,6 +103,21 @@ class jibot(irclib.irc):
 		#dictioanry containing a dictionary with entries amsternick and nickList
 		#nicks is the current users
 		self.nicks = dict()
+
+		self.favorites_file = 'jibot.favorites'
+		try:
+			f = open(self.favorites_file, 'r')
+			self.favorites = pickle.load(f)
+			f.close()
+		except:
+			self.favorites = []
+		self.disfavorites_file = 'jibot.disfavorites'
+		try:
+			f = open(self.disfavorites_file, 'r')
+			self.disfavorites = pickle.load(f)
+			f.close()
+		except:
+			self.disfavorites = []
 		
 	def do_join(self, m):
 		""" /join #m """
@@ -190,6 +206,17 @@ class jibot(irclib.irc):
 			f.close()
 			f = open(self.masternick_file, 'w')
 			pickle.dump(self.masternicks, f)
+			f.close()
+		except:
+			pass
+
+	def saveFavors(self):
+		try:
+			f = open(self.favorites_file, 'w')
+			pickle.dump(self.favorites, f)
+			f.close()
+			f = open(self.disfavorites_file, 'w')
+			pickle.dump(self.disfavorites, f)
 			f.close()
 		except:
 			pass
@@ -789,8 +816,39 @@ class jibot(irclib.irc):
 			self.hasquit = 1
 		else:
 			self.say("%s: you can't make me quit!" % (self.sendernick))
-		
+	
+	def cmd_favor(self, nick):
+		if (not self.sendernick == self.queen):
+			self.say("Only the Queen has favorites")
+			return	
+		if not nick in self.favorites:
+			self.favorites = [nick] + self.favorites[:4]
+			self.say("%s is now on %s's favorites list" % (nick,self.queen))
+		if nick in self.disfavorites:
+			self.disfavorites.remove(nick)
+		self.saveFavors()
 
+	def cmd_disfavor(self, nick):
+		if (not self.sendernick == self.queen):
+			self.say("Only the Queen has favorites")
+			return	
+		if not nick in self.disfavorites:
+			self.disfavorites = [nick] + self.disfavorites[:4]
+			self.say("%s is now on %s's least favorites list" % (nick,self.queen))
+		if nick in self.favorites:
+			self.favorites.remove(nick)
+		self.saveFavors()
+
+			
+	def cmd_favorites(self,m):
+		if (not self.sendernick == self.queen):
+			self.say("Only the Queen has favorites")
+		else:
+			if len (self.favorites) >0:
+				self.say("On  %s's favorites list: %s" % ",".join(self.favorites))
+			if len (self.disfavorites) >0:
+				self.say("On %s';s least favorites list: %s" % (self,sendernick                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ",".join(self.disfavorites))
+		
 if __name__ == '__main__':
 	while (1):
 		try:
