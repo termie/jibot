@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.91 $"[11:-2]
-__date__ = "$Date: 2004/01/04 09:49:52 $"[7:-2]
+__cvsversion__ = "$Revision: 1.92 $"[11:-2]
+__date__ = "$Date: 2004/01/16 21:17:30 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -54,7 +54,7 @@ class jibot(irclib.irc):
 		# IRC username (____@host.com)
 		username  = getenv('USER') or 'jibot'
 		# IRC channels (space separated)
-		inchannels = getenv('IRCCHANNEL') or '#joiito #mobilewhack'
+		inchannels = getenv('IRCCHANNEL') or '#joiito #mobilewhack #technorati #bloggercon'
 		self.channels = inchannels.split()
 
 		# The queen of the channel.
