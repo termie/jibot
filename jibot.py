@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.80 $"[11:-2]
-__date__ = "$Date: 2003/12/11 08:42:54 $"[7:-2]
+__cvsversion__ = "$Revision: 1.81 $"[11:-2]
+__date__ = "$Date: 2003/12/11 08:44:38 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -59,6 +59,8 @@ class jibot(irclib.irc):
 
 		# The queen of the channel.
 		self.queen = 'jeanniecool'
+		# The bots of the channel.
+		self.bots = [ 'xena', 'datum', 'shorten', 'workbench', 'surly', 'chomp' ]
 
 		# How we speak to the channels, either PRIVMSG or NOTICE
 		self.speech = 'PRIVMSG'
@@ -222,7 +224,7 @@ class jibot(irclib.irc):
 		else:
 			self.curchannel = recipient
 			self.msg = 0
-		if self.sendernick = 'xena' or self.sendernick = 'datum':
+		if self.sendernick in self.bots:
 			print 'Bot loop rejected.'
 			return
 		if (text.startswith(self.cmdchars)):
