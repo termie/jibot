@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.43 $"[11:-2]
-__date__ = "$Date: 2003/08/26 16:40:49 $"[7:-2]
+__cvsversion__ = "$Revision: 1.44 $"[11:-2]
+__date__ = "$Date: 2003/08/31 06:46:12 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -679,21 +679,24 @@ class jibot(irclib.irc):
 		except:
 			pass
 
-	def cmd_forgetnick(self, oldNick):
-		lcOldNick = string.lower(oldNick)
-		lcNick = string.lower(self.sendernick)
-		if (self.NickAka.has_key(lcOldNick)):
-			if (self.NickAka[lcNick]==self.NickAka[lcOldNick]):
-				nicklist = (self.masternicks[self.NickAka[lcNick]])['nicklist']
-				for nick in nicklist:
-					if (string.lower(nick) == lcOldNick):
-						nicklist.remove(nick)
-				del self.NickAka[lcOldNick]
-				self.saveNicks()
+	def cmd_forgetnick(self, oldNicks):
+		nickList = oldNicks.split()
+		for oldNick in nickList:
+			lcOldNick = string.lower(oldNick)
+			lcNick = string.lower(self.sendernick)
+			if (self.NickAka.has_key(lcOldNick)):
+				if (self.NickAka[lcNick]==self.NickAka[lcOldNick]):
+					nicklist = (self.masternicks[self.NickAka[lcNick]])['nicklist']
+					for nick in nicklist:
+						if (string.lower(nick) == lcOldNick):
+							nicklist.remove(nick)
+					del self.NickAka[lcOldNick] #remove mapping
+					self.addnick(oldNick) #make clean mapping - ie fresh masternicks
+					self.saveNicks()
+				else:
+					self.say("%s is not an alias for %s" % (oldNick,self.sendernick))
 			else:
-				self.say("%s is not an alias for %s" % (oldNick,self.sendernick))
-		else:
-			self.say("%s is not an nick I know" % (oldNick))
+				self.say("%s is not an nick I know" % (oldNick))
 
 	def cmd_forget(self, m):
 		""" Forget a definition """
