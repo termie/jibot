@@ -15,8 +15,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.18 $"[11:-2]
-__date__ = "$Date: 2003/06/17 08:30:02 $"[7:-2]
+__cvsversion__ = "$Revision: 1.19 $"[11:-2]
+__date__ = "$Date: 2003/06/17 10:25:37 $"[7:-2]
 
 import string, sys, os, re
 import random, time
@@ -108,6 +108,8 @@ class jibot(irclib.irc):
 						self.karma[who] += 1
 					if (text[-2:] == '--'):
 						self.karma[who] -= 1
+					if (self.karma[who] ==0):
+						del self.karma[who]
 					# Save definition in file
 					try:
 						f = open(self.karma_file, 'w')
