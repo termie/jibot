@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.83 $"[11:-2]
-__date__ = "$Date: 2003/12/12 00:05:11 $"[7:-2]
+__cvsversion__ = "$Revision: 1.84 $"[11:-2]
+__date__ = "$Date: 2003/12/13 02:47:19 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -803,15 +803,19 @@ class jibot(irclib.irc):
 				return
 			
 			concept = string.lower(' '.join(words[:pos]))
+			if (len(concept) < 1 or concept == ' '):
+				self.say('I need at least 3 words with an \'is\' in the middle')
+				return
 			definition = ' '.join(words[pos+1:])
 			if (not self.definitions.has_key(concept)):
 				self.definitions[concept] = []
 			self.definitions[concept][0] = definition
+
 			try:
 				f = open(self.def_file, 'w')
 				pickle.dump(self.definitions, f)
 				f.close()
-				self.say('I understand now, Dr. Chandra; %s is %s' % (concept, " & ".join(self.definitions[concept])))
+				self.say('I understand now, Dr. Chandra; %s is %s' % (concept, self.definitions[concept][0]))
 			except:
 				pass
 		else:
@@ -952,18 +956,23 @@ class jibot(irclib.irc):
 		if (self.definitions.has_key(concept)):
 			self.say('%s is %s' % (m,self.definitions[concept][0]))
 		else:
+			found = 0
 			try:
 				nickList = ((self.masternicks[self.NickAka[concept]])['nicklist'])[:]
 				for akaNick in nickList:
 					aka = akaNick.lower()
 					if (self.definitions.has_key(aka)):
 						self.say('%s (aka %s) is %s' % (concept,aka,self.definitions[concept][0]))
+						found = 1
 			except:
 				self.cmd_def_unknown(m)
-			if m in self.favorites:
-				self.say("%s is on %s's favorites list" % (m,self.queen))
-			if m in self.disfavorites:
-				self.say("%s is on %s's least favorites list" % (m,self.queen))
+				found = 1
+			if not found:
+				self.cmd_def_unknown(m)
+		if m in self.favorites:
+			self.say("%s is on %s's favorites list" % (m,self.queen))
+		if m in self.disfavorites:
+			self.say("%s is on %s's least favorites list" % (m,self.queen))
 
 	def cmd_def_all(self, m):
 		concept = string.lower(m)
