@@ -6,6 +6,7 @@
 #	Contributors
 #		Kevin Marks < http://epeus.blogspot.com/ >
 #		Jens-Christian Fischer
+#		Joi Ito  http://joi.ito.com/
 #
 #	This script is based in simpleclient.py
 #		(C) 1999  Erno Kuusela <erno@iki.fi> 
@@ -15,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.20 $"[11:-2]
-__date__ = "$Date: 2003/06/19 07:02:16 $"[7:-2]
+__cvsversion__ = "$Revision: 1.21 $"[11:-2]
+__date__ = "$Date: 2003/06/22 08:16:55 $"[7:-2]
 
 import string, sys, os, re
 import random, time
