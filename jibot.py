@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.51 $"[11:-2]
-__date__ = "$Date: 2003/09/19 16:43:18 $"[7:-2]
+__cvsversion__ = "$Revision: 1.52 $"[11:-2]
+__date__ = "$Date: 2003/09/22 07:30:39 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -209,6 +209,8 @@ class jibot(irclib.irc):
 			try:
 				i = (self.masternicks[nickMaster])['nicklist'].index(oldnick)
 			except:
+				if not self.masternicks.has_key(nickMaster):
+					self.addnick(nickMaster)
 				(self.masternicks[nickMaster])['nicklist'].append(oldnick)
 		self.saveNicks()
 
