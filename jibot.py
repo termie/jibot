@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.33 $"[11:-2]
-__date__ = "$Date: 2003/07/21 10:56:28 $"[7:-2]
+__cvsversion__ = "$Revision: 1.34 $"[11:-2]
+__date__ = "$Date: 2003/07/25 18:29:57 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -227,6 +227,7 @@ class jibot(irclib.irc):
 		m = irclib.msg(command='PRIVMSG',
 				params = [self.curchannel, line])
 		self.send(m)
+		time.sleep(1.5)
 
 	def get_next_word(self, s):
 		""" Next word """
@@ -449,7 +450,7 @@ class jibot(irclib.irc):
 		self.cmd_def(m)
 
 	def cmd_savedefs(self, m):
-		f = open(m, 'w')
+		f = open("defdump_%s.txt" % m, 'w')
 		for k,v in self.definitions.items():
 			for defn in v:
 				f.write("%s is %s\n" % (k,defn))
