@@ -15,8 +15,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.10 $"[11:-2]
-__date__ = "$Date: 2003/06/13 00:43:15 $"[7:-2]
+__cvsversion__ = "$Revision: 1.11 $"[11:-2]
+__date__ = "$Date: 2003/06/13 00:54:52 $"[7:-2]
 
 import string, sys, os, re
 import random, time
@@ -91,7 +91,7 @@ class jibot(irclib.irc):
 				print '<%s:%s> %s\n' % (self.sendernick, recipient, text)
 			elif (text[-2:] == '++' or text[-2:] == '--'):
 				# Karma
-				who = text[:-2]
+				who = string.lowercase(text[:-2])
 				if (len(who) > 0):
 					if (not self.karma.has_key(who)):
 						self.karma[who] = 0
@@ -105,7 +105,7 @@ class jibot(irclib.irc):
 						f = open(self.karma_file, 'w')
 						pickle.dump(self.karma, f)
 						f.close()
-						self.say('I feel much better now, I really do.')
+						self.say('%s has %d points now. Quite honestly, I wouldn\'t worry myself about that.' % (who, self.karma[who]))
 					except:
 						pass
 		else:
@@ -260,6 +260,7 @@ class jibot(irclib.irc):
 		self.say('Technorati: ?info blog.com || ?last blog.com')
 		self.say('Amazon: ?amazon words || ?isbn ISBN')
 		self.say('Google: ?search words')
+		self.say('Karma: nick++ || nick-- || ?karma nick || ?karma')
 	
 	def cmd_info(self, m):
 		""" Display """
@@ -318,7 +319,7 @@ class jibot(irclib.irc):
 				self.say(message.encode('ISO-8859-1'))
 				i += 1
 		except:
-			self.say('I cannot search %s. Quite honestly, I wouldn\'t worry myself about that.' % (m))
+			self.say('I cannot search %s. I am aware of these facts.' % (m))
 			
 	def cmd_google(self, m):
 		""" Query google """
