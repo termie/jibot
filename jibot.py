@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.77 $"[11:-2]
-__date__ = "$Date: 2003/12/08 10:24:30 $"[7:-2]
+__cvsversion__ = "$Revision: 1.78 $"[11:-2]
+__date__ = "$Date: 2003/12/08 11:00:32 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -64,7 +64,7 @@ class jibot(irclib.irc):
 		self.speech = 'PRIVMSG'
 
 		# Debug mode
-		# self.debug = 1
+		self.debug = 0 # 1
 
 		# End configurable options.
 
@@ -93,7 +93,9 @@ class jibot(irclib.irc):
 			self.definitions = pickle.load(f)
 			f.close()
 			for k, v in self.definitions.items():
-				if (type(v) == type('string')):
+				if (not isinstance(k, str) or len(k) < 1 or k == ' '):
+					del self.definitions[k]
+				elif (type(v) == type('string')):
 					self.definitions[k] = v.split(" and ")
 		except:
 			self.definitions = dict()
@@ -240,8 +242,9 @@ class jibot(irclib.irc):
 		if not self.masternicks.has_key(lcNick):
 			self.masternicks[lcNick] = dict()
 			(self.masternicks[lcNick])['nicklist'] = [nick]
-		#print "nick aka:", self.NickAka
-		#print "masternicks:", self.masternicks
+		if self.debug:
+			print "nick aka:", self.NickAka
+			print "masternicks:", self.masternicks
 		
 	def addnickalias(self, nick, aliasnick):
 		self.addnick(nick)
@@ -304,7 +307,8 @@ class jibot(irclib.irc):
 			for nick in list:
 				self.nicks[nick] = nick
 				self.addnick(nick)
-			print self.nicks
+			if self.debug:
+				print self.nicks
 		elif (m.command == 'NICK'):
 			nick = m.params[-1]
 			self.nicks[nick] = nick
@@ -800,6 +804,9 @@ class jibot(irclib.irc):
 				return
 			
 			concept = string.lower(' '.join(words[:pos]))
+			if (len(concept) < 1 or concept == ' '):
+				self.say('I need at least 3 words with an \'is\' in the middle')
+				return
 			definition = ' '.join(words[pos+1:])
 			if (not self.definitions.has_key(concept)):
 				self.definitions[concept] = []
