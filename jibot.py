@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.58 $"[11:-2]
-__date__ = "$Date: 2003/11/19 21:17:32 $"[7:-2]
+__cvsversion__ = "$Revision: 1.59 $"[11:-2]
+__date__ = "$Date: 2003/11/19 21:22:11 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -459,8 +459,8 @@ class jibot(irclib.irc):
 					self.say('%s has no other names I know about' % (m))
 			else:
 				#fix broken masternicks
-				self.nickAka[nick] = nick
-				self.addNick(m)
+				self.NickAka[nick] = nick
+				self.addnick(m)
 				self.say('%s had a broken AKA list - try again' % (m))
 		else:
 			self.say('%s is not a nick I know' % (m))
