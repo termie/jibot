@@ -501,6 +501,9 @@ class NickHandler(MessageHandler):
             if lc_nick == x.lower():
                 nick_list.remove(x)
         if 0 < len(nick_list):
+            if len(nick_list)>10:
+		nick_list=nick_list[:10]
+		nick_list.append("too many more to list.")
             self._root.say ('%s is also known as %s' % (nick," and ".join(nick_list)))
         else:
     		self._root.say('%s has no other names I know about' % (nick))
