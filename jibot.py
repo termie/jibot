@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.85 $"[11:-2]
-__date__ = "$Date: 2003/12/17 07:53:24 $"[7:-2]
+__cvsversion__ = "$Revision: 1.86 $"[11:-2]
+__date__ = "$Date: 2003/12/17 22:38:20 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -192,9 +192,7 @@ class jibot(irclib.irc):
 
 	def handle_karma(self, who, text):
 		if (len(who) > 0 and len(text) > 0):
-			if (self.karma.has_key(who)):
-				pass
-			else:
+			if not self.karma.has_key(who):
 				self.karma[who] = 0
 
 			if (text[-2:] == '++'):
@@ -412,7 +410,7 @@ class jibot(irclib.irc):
 			print '-- no current channel!'
 			return
 		line = string.rstrip(line)
-		line = '\001ACTION' + line + '\001'  
+		line = '\001ACTION ' + line + '\001'  
 		m = irclib.msg(command = 'PRIVMSG',
 			       params = [self.curchannel, line])
 		self.send(m)
