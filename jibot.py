@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.56 $"[11:-2]
-__date__ = "$Date: 2003/10/17 06:29:48 $"[7:-2]
+__cvsversion__ = "$Revision: 1.57 $"[11:-2]
+__date__ = "$Date: 2003/10/19 04:25:21 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -798,13 +798,6 @@ class jibot(irclib.irc):
 					self.say("%s is on %s's favorites list" % (m,self.queen))
 				if m in self.disfavorites:
 					self.say("%s is on %s's least favorites list" % (m,self.queen))
-		
-	def cmd_introduce(self, m):
-		""" Introductions """
-		for k,v in self.nicks.items():
-			if (self.definitions.has_key(string.lower(k))):
-				self.say('%s is %s' % (k, " and ".join(self.definitions[string.lower(k)])))
-
 
 	def cmd_assert(self, m):
 		""" Joi's first command """
