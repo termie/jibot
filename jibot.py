@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.72 $"[11:-2]
-__date__ = "$Date: 2003/12/05 03:10:18 $"[7:-2]
+__cvsversion__ = "$Revision: 1.73 $"[11:-2]
+__date__ = "$Date: 2003/12/05 04:03:10 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -142,8 +142,17 @@ class jibot(irclib.irc):
 		#masternicks has the info mapping from nick ID to list of related ones and master nick
 		#dictionary containing a dictionary with entries masternick and nickList
 		#nicks is the current users
-		# NOTE nicks shooudl be per channel now; which it isn't.
+		# NOTE nicks should be per channel now; which it isn't.
+		#      see bug #854509 on sourceforge
 		self.nicks = dict()
+
+		self.heraldme_file = 'jibot.heraldme'
+		try:
+			f = open(self.heraldme_file, 'r')
+			self.heraldme = pickle.load(f)
+			f.close()
+		except:
+			self.heraldme = {}
 
 		self.favorites_file = 'jibot.favorites'
 		try:
@@ -304,14 +313,14 @@ class jibot(irclib.irc):
 			self.addnickalias(oldnick,nick)
 			if (self.herald):
 				if (self.definitions.has_key(string.lower(nick)) and (not self.definitions.has_key(string.lower(oldnick)))):
-					self.cmd_def(nick)
+					self.say_herald(nick)
 		elif (m.command == 'JOIN'):
 			self.curchannel =  m.params[0]
 			nick = string.split(m.prefix, '!')[0]
 			self.nicks[nick] = nick
 			self.addnick(nick)
 			if (self.herald):
-				self.queue_herald(nick)
+				self.say_herald(nick)
 		elif (m.command == 'QUIT') or (m.command == 'PART'):
 			oldnick = string.split(m.prefix, '!')[0]
 			if (self.nicks.has_key(oldnick)):
@@ -468,14 +477,17 @@ class jibot(irclib.irc):
 				  params = [recipient, rest]))
 		print '-->', recipient, ':', rest
 
-	def queue_herald(self, m):
+	def say_herald(self, m):
 		""" Queue a herald, unless bucket is already full """
 		if (time.time() - self.herald_stamp < 2):
 			self.heraldq = self.heraldq + 1
 		else:
 			self.heraldq = 0
 		if (self.heraldq < 2):
-			self.cmd_def(m)
+			if m in self.heraldme:
+			    self.cmd_def_first(m)
+			else:
+			    self.cmd_def(m)
 			self.herald_stamp = time.time()
 
 	""" 'Channel' commands """
@@ -543,6 +555,23 @@ class jibot(irclib.irc):
 				self.say('started heralding')
 		else:
 			self.say('I can only do that in a channel.')
+
+	def cmd_heraldme(self, m):
+		if (self.sendernick and len(self.sendernick) > 0):
+			if (self.sendernick in self.heraldme):
+				del self.heraldme[self.sendernick]
+				self.say('now heralding your full definition')
+			else:
+				self.heraldme[self.sendernick] = 1
+				self.say('now heralding only your first definition')
+			try:
+				f = open(self.heraldme_file, 'w')
+				pickle.dump(self.heraldme, f)
+				f.close()
+			except:
+				print 'Unable to save heraldme for %s' % who
+		else:
+			print 'Received odd heraldme: %s' % m
 
 	def cmd_info(self, m):
 		""" Display """
@@ -838,7 +867,48 @@ class jibot(irclib.irc):
 				pass
 		else:
 			self.say('I can only do that in a channel.')
-			
+
+	def cmd_def_unknown(self, m):
+		unknownphrases = ("It's puzzling, I don't think I've ever seen anything like %s before","No-one has dished the dirt on %s yet",
+		"Perhaps if %s makes friends with jeannie I'll say something nice next time", "Are you new here, %s?","Is %s a pseudonym?")
+		self.say(unknownphrases[int(random.random() *len(unknownphrases))] %(m))
+
+	def cmd_def_first(self, m):
+		concept = string.lower(m)
+		if (self.definitions.has_key(concept)):
+			self.say('%s is %s' % (m,self.definitions[concept][0]))
+		else:
+			try:
+				nickList = ((self.masternicks[self.NickAka[concept]])['nicklist'])[:]
+				for akaNick in nickList:
+					concept = string.lower(akaNick)
+					if (self.definitions.has_key(concept)):
+						self.cmd_def_first(concept)
+			except:
+				self.cmd_def_unknown(m)
+			if m in self.favorites:
+				self.say("%s is on %s's favorites list" % (m,self.queen))
+			if m in self.disfavorites:
+				self.say("%s is on %s's least favorites list" % (m,self.queen))
+
+	def cmd_def_all(self, m):
+		concept = string.lower(m)
+		if (self.definitions.has_key(concept)):
+			self.say('%s is %s' % (m,' and '.join(self.definitions[concept])))
+		else:
+			try:
+				nickList = ((self.masternicks[self.NickAka[concept]])['nicklist'])[:]
+				for akaNick in nickList:
+					concept = string.lower(akaNick)
+					if (self.definitions.has_key(concept)):
+						self.cmd_def_all(concept)
+			except:
+				self.cmd_def_unknown(m)
+			if m in self.favorites:
+				self.say("%s is on %s's favorites list" % (m,self.queen))
+			if m in self.disfavorites:
+				self.say("%s is on %s's least favorites list" % (m,self.queen))
+
 	def cmd_def(self, m):
 		""" Display a stored definition """
 		if (m == ""):
@@ -849,24 +919,7 @@ class jibot(irclib.irc):
 			pos = words.index('is') 
 			self.cmd_learn(m) #ie do this if there is an 'is' involved
 		except:
-			concept = string.lower(m)
-			if (self.definitions.has_key(concept)):
-				self.say('%s is %s' % (m, " and ".join(self.definitions[concept])))
-			else:
-				try:
-					nickList = ((self.masternicks[self.NickAka[concept]])['nicklist'])[:]
-					for akaNick in nickList:
-						concept = string.lower(akaNick)
-						if (self.definitions.has_key(concept)):
-							self.say('%s is aka %s, and %s is %s' % (m, akaNick,akaNick," and ".join(self.definitions[concept])))
-				except:
-					unknownphrases = ("It's puzzling, I don't think I've ever seen anything like %s before","No-one has dished the dirt on %s yet",
-					"Perhaps if %s makes friends with jeannie I'll say something nice next time", "Are you new here, %s?","Is %s a pseudonym?")
-					self.say(unknownphrases[int(random.random() *len(unknownphrases))] %(m))
-				if m in self.favorites:
-					self.say("%s is on %s's favorites list" % (m,self.queen))
-				if m in self.disfavorites:
-					self.say("%s is on %s's least favorites list" % (m,self.queen))
+			self.cmd_def_all(m)
 
 	def cmd_assert(self, m):
 		""" Joi's first command """
