@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.55 $"[11:-2]
-__date__ = "$Date: 2003/10/14 22:35:31 $"[7:-2]
+__cvsversion__ = "$Revision: 1.56 $"[11:-2]
+__date__ = "$Date: 2003/10/17 06:29:48 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -773,7 +773,7 @@ class jibot(irclib.irc):
 	def cmd_def(self, m):
 		""" Display a stored definition """
 		if (m == ""):
-			#self.say("I know about %s" % (" and ".join(self.definitions.keys())))
+			self.say("Braindump is at http://jibot.joi.ito.com:8080/braindump.rpy")
 			return
 		words = m.split()
 		try:
@@ -821,16 +821,7 @@ class jibot(irclib.irc):
 			
 	def cmd_karma(self, m):
 		if (m == ""):
-			message = ""
-			count=0
-			for nick in self.karma:
-				count=count+1
-				message = "%s [%s: %s]" % (message, nick, self.karma[nick])
-				if (count % 5) == 0:
-					self.say(message)
-					message=""
-			if (count % 5) > 0:
-				self.say(message)
+			self.say("Chart is at http://jibot.joi.ito.com:8080/karmadump.rpy")
 		else:
 			words = m.split()
 			nick = words[0]
