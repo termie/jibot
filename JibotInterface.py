@@ -430,8 +430,9 @@ class NickHandler(MessageHandler):
             self._cur_nicks[nick.lower()]=nick
             if not self._aliasDB.has_key(nick):
                 self.add_nick(nick.lower())
-                self._heraldHandler.say_herald_unknown(nick)
-            else:
+                if not self._defDB.has_key(nick):
+                    self._heraldHandler.say_herald_unknown(nick)
+            if self._defDB.has_key(nick):
                 self._heraldHandler.say_herald(nick)
             return True
         elif (m.command == 'QUIT') or (m.command == 'PART'):
