@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.54 $"[11:-2]
-__date__ = "$Date: 2003/10/08 23:35:18 $"[7:-2]
+__cvsversion__ = "$Revision: 1.55 $"[11:-2]
+__date__ = "$Date: 2003/10/14 22:35:31 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -152,7 +152,8 @@ class jibot(irclib.irc):
 				# Karma
 				who = string.lower(text[:-2])
 				if (len(who) > 16):
-					self.say('That\'s a lengthy nick, Dave. Ignoring.')
+					#self.say('That\'s a lengthy nick, Dave. Ignoring.')
+					pass
 				elif (len(who) > 0):
 					if (self.karma.has_key(who)):
 						pass
@@ -169,7 +170,7 @@ class jibot(irclib.irc):
 						f = open(self.karma_file, 'w')
 						pickle.dump(self.karma, f)
 						f.close()
-						self.say('%s has %d points now' % (who, self.karma[who]))
+						#self.say('%s has %d points now' % (who, self.karma[who]))
 						# self.say('Quite honestly, I wouldn\'t worry myself about that.')
 					except:
 						pass
