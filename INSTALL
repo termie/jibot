@@ -9,12 +9,5 @@ jibot needs Python 2.3
 If you are upgrading from a pre-SQLite version and would like to convert the
 databases, the "dbconverter.py" script should help you, but you will need to modify it.
 
-From http://diveintomark.org/projects/ download the following
-libraries:
-
-	- PyTechnorati
-	- PyAmazon
-	- PyGoogle
-	- RSS Parser
-
-You will need Technorati, Amazon and Google application keys.
+You will need Technorati, Amazon and Google application keys to make use
+of those features

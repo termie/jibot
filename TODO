@@ -1,6 +1,9 @@
 TODO
 ----
 
-- Inheritable IRC class
+2004-05-19
+  Per-channel nick memory for use in heralding on nick change
 
+--
+- Inheritable IRC class
 - Check new links for channel regular user' blogs

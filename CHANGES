@@ -1,5 +1,59 @@
 CHANGES
 -------
+2004-05-19 - 0.6.1.2
+    - Fixed the behavior in which a person who has no def is heralded as 
+      unknown even if we've already seen them.
+    - Fixed an issue with people being re-heralded after a netsplit by
+      setting the last_herald for them more often (on quit, for instance)
+      Also checks if the nick is in cur_nicks before heralding, in case it
+      never saw the person quit (first out in netsplit, first in scenario)
+      If netsplit lasts for more than 10 minutes, all bets are off, it will
+      herald the first two 'new' nicks it sees.
+    - Gave ?quit the option of including a custom message, 
+      e.g. '?quit QUick update...'
+    - Fixed a typo where favorites was spelled favorties
+    - Fixed another typo that was sending cmd_favorites many arguments
+    - Added a default behavior for a ?karma with no argument
+    - Replaced some of the defDB functionality with a re.split() to split on
+      'and' and '&' as well as stripping them from the front of an entry 
+      should they show up there. This means you can ?def and ?forget multiple
+      items at once.
+    - Added useful information to ?forget when multiple phrases are being
+      removed.
+    - Fixed another issue with favorites with things being treated as boolean
+      instead of int
+    - Uses the identification checking to securely identify the owners as well
+      as The Queen
+    - Allows the ?forgetnick, ?heraldme, and queen commands in private message
+      if identification checking is on and the user is identified
+    - Added jeanniecool as a default owner
+    - Added technorati as a default channel
+    - Will now only recognize nicks it has seen before for favoring, to
+      prevent favoring of odd things and phrases, also forces everthing into
+      lowercase
+    - Removed the delay from the say and action commands, freenode staff says
+      that throttling won't be a problem
+    - Added a default ?blog action that gives the location of the blog
+    - Nick didn't pass any useful parameters, so it is ignored in the parse()
+      method for JibotMessage.
+    - The Technorati API is now updated to handle the latest version should
+      the date formate be changed, and has more error handling regardless.
+    
+2004-04-25 - 0.6.1.1
+    - Added the ability to check for identification, the config file setting
+      is 'check_identification'(boolean), and is on by default, currently
+      nothing is checking against this, however.
+    - Added the ability to identify with NickServ using a password stored in
+      a plaintext file, 'identifykey.txt' by default, and is off by default
+      because you will need to register the nick before it can be used.
+      The config options for this functionality are 'identify'(boolean) and
+      'identify_key_file'(filename)
+    - Fixed a bug with ?learn_first, it was using some early code and wasn't
+      converting to a string.
+    - Added some type checks to the defDB
+    - Made ?help respond in PM, ?help by itself will PM you with the message
+      while ?help <nick> will PM that nick
+      
 2004-04-20 - 0.6
     - Now requires Python 2.3 and SQLite (for SQLite db integration)
     - Massive refactor, jibot.py has been replaced by JibotConfig,

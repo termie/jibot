@@ -4,7 +4,8 @@ STARTING THE BOT
     Unix: $ python JibotLaunch.py
 	Windows: C:\> python JibotLaunch.py
 
-    A default config file is included as jibot.conf
+    A default config file is included as jibot.conf, you can change 
+    that file to change the bot settings, or specify your own config file.
 
 COMMAND-LINE OPTIONS
 --------------------
