@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.38 $"[11:-2]
-__date__ = "$Date: 2003/08/07 04:20:48 $"[7:-2]
+__cvsversion__ = "$Revision: 1.39 $"[11:-2]
+__date__ = "$Date: 2003/08/17 07:13:37 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -26,6 +26,26 @@ import cPickle as pickle
 
 import technorati, google, amazon
 import irclib, rssparser
+
+import threading
+                
+cmd_def_lock = threading.Lock()
+
+class TimeScheduled(threading.Thread):
+	""" Timer Class -- does not provide mutual exclusion """
+	def __init__(self, function, delay):
+		threading.Thread.__init__(self)
+		self.function = function
+		self.delay = delay
+
+	def run(self):
+		self.alive = 1
+		while self.alive:
+			self.function()
+			time.sleep(self.delay)
+
+	def kill(self):
+		self.alive = 0
 
 class jibot(irclib.irc):
 	""" #joiito's bot class """
@@ -36,6 +56,7 @@ class jibot(irclib.irc):
 		self.curchannel = None
 		self.wannaquit = 0
 		self.hasquit = 0
+		self.heraldq = []
 		irclib.irc.__init__(self)
 		self.debug = 1
 		# Variable declarations
@@ -210,7 +231,7 @@ class jibot(irclib.irc):
 			self.nicks[nick] = nick
 			self.addnick(nick)
 			if (self.herald):
-				self.cmd_def(nick)
+				self.queue_herald(nick)
 		elif (m.command == 'QUIT'):
 			del self.nicks[string.split(m.prefix, '!')[0]]
 			print '%s quit' %(string.split(m.prefix, '!')[0])
@@ -230,6 +251,8 @@ class jibot(irclib.irc):
 	def loop(self):
 		""" Main loop """
 		import select
+		scheduledHerald = TimeScheduled(self.sendherald, 2)
+		scheduledHerald.start()
 		while not self.wannaquit:
 			r, w, e = select.select([self], [], [])
 			if self in r:
@@ -242,6 +265,7 @@ class jibot(irclib.irc):
 			##	self.checklinks()
 			#if sys.stdin in r:
 			#	self.user_cmd(sys.stdin.readline())
+		scheduledHerald.kill()
 
 	def checklinks():
 		""" Check links 
@@ -678,6 +702,7 @@ class jibot(irclib.irc):
 		if (m == ""):
 			#self.say("I know about %s" % (" and ".join(self.definitions.keys())))
 			return
+		cmd_def_lock.acquire()
 		words = m.split()
 		try:
 			pos = words.index('is') 
@@ -698,6 +723,8 @@ class jibot(irclib.irc):
 					"Perhaps if %s makes friends with jeannie I'll say something nice next time", "Are you new here, %s?","Is %s a pseudonym?")
 					self.say(unknownphrases[int(random.random() *len(unknownphrases))] %(m))
 		
+		cmd_def_lock.release()
+
 	def cmd_introduce(self, m):
 		""" Introductions """
 		for k,v in self.nicks.items():
@@ -737,6 +764,7 @@ class jibot(irclib.irc):
 				self.say('%s has %s points' % (nick, self.karma[nick]))
 			except:
 				pass
+
 	def cmd_blog(self, m):
 		if (m == ""):
 			return
@@ -747,6 +775,16 @@ class jibot(irclib.irc):
 				self.say('Posted.')
 		except:
 			self.say('I cannot blog.')
+
+	def queue_herald(self, m):
+		""" Queue a herald, unless bucket is already full """
+		if (len(self.heraldq) < 2):
+			self.heraldq.append(m)
+
+	def sendherald(self):
+		""" Issue a queued herald, if any """
+		if (len(self.heraldq) > 0):
+			self.cmd_def(self.heraldq.pop())
 
 	def cmd_quit(self, m):
 		if (m == ""):
