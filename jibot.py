@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.93 $"[11:-2]
-__date__ = "$Date: 2004/01/20 09:56:08 $"[7:-2]
+__cvsversion__ = "$Revision: 1.94 $"[11:-2]
+__date__ = "$Date: 2004/02/07 05:25:32 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -54,7 +54,7 @@ class jibot(irclib.irc):
 		# IRC username (____@host.com)
 		username  = getenv('USER') or 'jibot'
 		# IRC channels (space separated)
-		inchannels = getenv('IRCCHANNEL') or '#joiito #mobilewhack #technorati #bloggercon'
+		inchannels = getenv('IRCCHANNEL') or '#joiito #mobilewhack #technorati #bloggercon #etech'
 		self.channels = inchannels.split()
 
 		# The queen of the channel.
@@ -566,8 +566,8 @@ class jibot(irclib.irc):
 		""" FIXME: this needs to understand potential other cmd chars. """
 		
 		self.say('JiBot - #JoiIto\'s bot - http://joi.ito.com/joiwiki/JiBot')
-		self.say('Dictionary and user info: ?learn concept is definition || ?whois concept || ?whatis concept')
-		self.say('Technorati: ?info blog.com || ?last blog.com || ?cosmos blog.com || ?search keywords')
+		self.say('Dictionary and user info: ?learn concept is definition || ?whois concept || ?whatis concept ||?forget concept is definition || ?forgetme')
+		self.say('Technorati: ?info blog.com || ?last blog.com || ?cosmos blog.com || ?blogrep keywords')
 		self.say('Amazon: ?amazon words || ?asin ASIN || ?isbn ISBN')
 		self.say('Google: ?google words')
 		self.say('Karma: nick++ || nick-- || ?karma nick || ?karma')
