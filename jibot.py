@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.65 $"[11:-2]
-__date__ = "$Date: 2003/12/05 00:16:24 $"[7:-2]
+__cvsversion__ = "$Revision: 1.66 $"[11:-2]
+__date__ = "$Date: 2003/12/05 00:25:13 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -153,7 +153,7 @@ class jibot(irclib.irc):
 		self.send(reply)
 
 	def do_privmsg(self, m):
-		""" Sends private message """
+		""" Handles private message """
 		recipient, text = m.params
 		sender = m.prefix
 		self.sendernick = string.split(sender, '!')[0]
@@ -162,9 +162,9 @@ class jibot(irclib.irc):
 			self.msg = 1
 		else:
 			self.msg = 0
-			self.curchannel =  recipient
+			self.curchannel = recipient
 		if recipient[0] not in irclib.NICKCHARS:
-			if (text[0] == self.cmdchars):
+			if (text.startswith(self.cmdchars)):
 				self.channel_cmd(text)
 				print '<%s:%s> %s\n' % (self.sendernick, recipient, text)
 			elif (text[-2:] == '++' or text[-2:] == '--'):
@@ -192,7 +192,7 @@ class jibot(irclib.irc):
 						#self.say('%s has %d points now' % (who, self.karma[who]))
 						# self.say('Quite honestly, I wouldn\'t worry myself about that.')
 					except:
-						pass
+						print 'Unable to save karma for %s' % who
 		else:
 			print '[%s]' % self.sendernick, 'to (%s)' % recipient,
 			print text
