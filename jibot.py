@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.22 $"[11:-2]
-__date__ = "$Date: 2003/06/22 08:35:35 $"[7:-2]
+__cvsversion__ = "$Revision: 1.23 $"[11:-2]
+__date__ = "$Date: 2003/06/22 08:56:42 $"[7:-2]
 
 import string, sys, os, re
 import random, time
@@ -339,7 +339,7 @@ class jibot(irclib.irc):
 			
 
 	def cmd_cosmos(self, m):
-		""" Tchnorati cosmos """
+		""" Technorati cosmos """
 		if (m == ""):
 			return
 		try:
@@ -528,7 +528,14 @@ class jibot(irclib.irc):
 		self.say('Kevin Marks is away, but he\'s the limericks guy.')
 		self.say('And datum is a stupid bot. I\'m better. Of course.')
 		self.say('Joi has just learned how to use cvs.')
-		
+
+	def cmd_assert(self, m):
+		if (m == ""):
+			pass
+		else:
+			message = "Jibot agrees that " + m
+			self.say(message)
+			
 	def cmd_karma(self, m):
 		if (m == ""):
 			message = ""
