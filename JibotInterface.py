@@ -579,9 +579,10 @@ class NickHandler(MessageHandler):
         self._masternickDB.set(base_alias, base_alias_nicklist)
 
 class FavorHandler(MessageHandler):
-    def __init__(self,favorDB,root,name="FavorHandler",queen="The Queen"):
+    def __init__(self,favorDB,aliasDB,root,name="FavorHandler",queen="The Queen"):
         MessageHandler.__init__(self,name=name,root=root)
         self._favorDB=favorDB
+        self._aliasDB=aliasDB
         self.queen=queen
         self._handles = ("favor", "disfavor", "unfavor","favorites","pardon","savefavors")
     
@@ -597,19 +598,7 @@ class FavorHandler(MessageHandler):
             self._root.say_no_private(m)
             return True
         nick = m.rest
-        if "favor" == m.cmd:
-            self.cmd_favor(m,nick)
-            return True
-        elif "disfavor" == m.cmd:
-            self.cmd_disfavor(m,nick)
-            return True
-        elif "unfavor" == m.cmd:
-            self.cmd_unfavor(m,nick)
-            return
-        elif "pardon" == m.cmd:
-            self.cmd_pardon(m,nick)
-            return True
-        elif "favorites" == m.cmd:
+        if "favorites" == m.cmd:
             self.cmd_favorites(m)
             return True
         elif "savefavors" == m.cmd:
@@ -622,15 +611,30 @@ class FavorHandler(MessageHandler):
                     return True
             else:
                 self._root.say_only_owners(m)
+        elif not self._aliasDB.has_key(nick):
+            self.say_not_nick(m)
+            return True
+        elif "favor" == m.cmd:
+            self.cmd_favor(m,nick)
+            return True
+        elif "disfavor" == m.cmd:
+            self.cmd_disfavor(m,nick)
+            return True
+        elif "unfavor" == m.cmd:
+            self.cmd_unfavor(m,nick)
+            return True
+        elif "pardon" == m.cmd:
+            self.cmd_pardon(m,nick)
+            return True
         else:
             return False
     
     def say_favor(self,nick):
-        if self._favorDB.has_key(nick.lower()):
-            favor=self._favorDB.get(nick.lower())
-            if 1 == favor:
+        if self._favorDB.has_key(nick)):
+            favor=self._favorDB.get(nick)
+            if "1" == favor:
                 self._root.say("%s is on %s's favorites list"%(nick,self.queen))
-            elif -1 == favor:
+            elif "-1" == favor:
                 self._root.say("%s is on %s's least favorites list"%(nick,self.queen))
         else:
             pass
@@ -638,31 +642,34 @@ class FavorHandler(MessageHandler):
     def say_queen_only(self,m):
         self._root.say("Only the Queen has favorites")
 
-    def cmd_favor(self,m,nick=None):
-        if None == nick: nick = m.rest
-        self._favorDB.set_favor(nick.lower(),favor=1)
+    def say_not_nick(self,m):
+        self._root.say("That is not a nick I have heard of")
+
+    def cmd_favor(self,m,nick):
+        self._favorDB.favor(nick)
         self._root.say("%s is now on %s's favorites list" % (nick, self.queen))
     
-    def cmd_unfavor(self,m,nick=None):
-        if None == nick: nick = m.rest
-        self._favorDB.set_favor(nick.lower(),favor=0)
+    def cmd_unfavor(self,m,nick):
+        self._favorDB.unfavor(nick)
         self._root.say("%s is no longer looked upon with favor" % (nick))
     
-    def cmd_pardon(self,m,nick=None):
-        if None == nick: nick = m.rest
-        self._favorDB.set_favor(nick.lower(),favor=0)
+    def cmd_pardon(self,m,nick):
+        self._favorDB.pardon(nick)
         self._root.say("%s is no longer looked upon with disfavor" % (nick))
     
-    def cmd_disfavor(self,m,nick=None):
-        if None == nick: nick = m.rest
-        self._favorDB.set_favor(nick.lower(),favor=-1)
+    def cmd_disfavor(self,m,nick):
+        self._favorDB.disfavor(nick)
         self._root.say("%s is now on %s's least favorites list" % (nick, self.queen))
 
     def cmd_favorites(self,m):
-        self._root.say("On %s's favorites list: %s"\
-            %(self.queen, ", ".join(self._favorDB.get_favorites())))
-        self._root.say("On %s's least favorites list: %s"\
-            %(self.queen, ", ".join(self._favorDB.get_disfavorites())))
+        favs = self._favorDB.get_favorites()
+        disfavs = self._favorDB.get_disfavorites()
+        if not 0 == len(favs):
+            self._root.say("On %s's favorites list: %s"\
+                %(self.queen, ", ".join(favs)))
+        if not 0 == len(disfavs):
+            self._root.say("On %s's least favorites list: %s"\
+                %(self.queen, ", ".join(disfavs)))
         return True
 
     def cmd_savefavors(self,m):

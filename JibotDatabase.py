@@ -431,10 +431,10 @@ class FavorWrapper(DatabaseWrapper):
     def __init__(self,database):
         DatabaseWrapper.__init__(self,database)
         
-    def get_favor(self,nick,default=0):
-        return int(self._database.get(nick,default))
+    def get_favor(self,nick,default="0"):
+        return self._database.get(nick,default)
     
-    def set_favor(self,nick,favor=1):
+    def set_favor(self,nick,favor="1"):
         if self._database.has_key(nick):
             self._database.set(nick,favor)
         else:
@@ -443,28 +443,28 @@ class FavorWrapper(DatabaseWrapper):
     def get_favorites(self):
         favs = []
         for k,v in self._database.iteritems():
-            if int(v) > 0: favs.append(k)
+            if v == "1": favs.append(k)
         return favs
 
     def get_disfavorites(self):
         disfavs = []
         for k,v in self._database.iteritems():
-            if int(v) < 0: disfavs.append(k)
+            if v == "-1": disfavs.append(k)
         return disfavs
     
     def pardon(self,nick):
         """ Shortcut """
-        self.set_favor(nick,favor=0)
+        self.set_favor(nick,favor="0")
     
     def unfavor(self,nick):
         """ Shortcut """
-        self.set_favor(nick,favor=0)
+        self.set_favor(nick,favor="0")
     
     def favor(self,nick):
         """ Shortcut """
-        self.set_favor(nick,favor=1)
+        self.set_favor(nick,favor="1")
     
     def disfavor(self,nick):
         """ Shortcut """
-        self.set_favor(nick,favor=-1)
+        self.set_favor(nick,favor="-1")
         

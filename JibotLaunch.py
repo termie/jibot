@@ -202,7 +202,7 @@ def main ():
     funHandler = JibotInterface.FunHandler(root=jibot)
     defHandler = JibotInterface.DefHandler(defDB,jibot)
     karmaHandler = JibotInterface.KarmaHandler(karmaDB,jibot)
-    favorHandler = JibotInterface.FavorHandler(favorDB,jibot,queen=config.get("global","queen"))
+    favorHandler = JibotInterface.FavorHandler(favorDB,aliasDB,jibot,queen=config.get("global","queen"))
     heraldHandler = JibotInterface.HeraldHandler(heraldDB,defDB,aliasDB,\
                                                  favorHandler,root=jibot,\
                                                  herald=config.get("global","herald"))
