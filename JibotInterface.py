@@ -595,7 +595,7 @@ class FavorHandler(MessageHandler):
             self.cmd_pardon(m,nick)
             return True
         elif "favorites" == m.cmd:
-            self.cmd_favorites(m,nick)
+            self.cmd_favorites(m)
             return True
         elif "savefavors" == m.cmd:
             if m.sender_nick in self._root.owners:
