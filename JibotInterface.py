@@ -185,6 +185,9 @@ class JibotInterface:
     
     def say_only_owners(self,m):
         self.say("Only my owners can do that")
+
+    def say_not_identified(self,m):
+        self.say("Please identify yourself with NickServ")
     
     def action(self,s):
         if not self._cur_channel:
@@ -441,7 +444,10 @@ class NickHandler(MessageHandler):
             return True
         else:
             if "forgetnick" == m.cmd:
-                if m.private and not m.identified: 
+                if m.private and \
+                        ((self._root.check_identification and \
+                        not m.identified) or \
+                        not self._root.check_identification):
                     self._root.say_no_private(m)
                 else:
                     self.cmd_forgetnick(m)
@@ -581,13 +587,13 @@ class FavorHandler(MessageHandler):
     
     def handle(self,m):
         MessageHandler.handle(self,m)
-        if self._root.check_identification and not m.identified:
-            self.say_queen_only(m)
-            return True
         if self.queen.lower() != m.sender_nick.lower():
             self.say_queen_only(m)
             return True
-        if m.private and not m.identified:
+        if self._root.check_identification and not m.identified:
+            self.say_not_identified(m)
+            return True
+        if m.private and not self._root.check_identification:
             self._root.say_no_private(m)
             return True
         nick = m.rest
@@ -609,11 +615,13 @@ class FavorHandler(MessageHandler):
         elif "savefavors" == m.cmd:
             if m.sender_nick in self._root.owners:
                 if self._root.check_identification and not m.identified:
-                    self._root.say_only_owners(m)
+                    self._root.say_not_identified(m)
                     return False
                 else:
                     self.cmd_savefavors(m)
                     return True
+            else:
+                self._root.say_only_owners(m)
         else:
             return False
     
@@ -688,7 +696,10 @@ class HeraldHandler(MessageHandler):
     def handle(self,m):
         MessageHandler.handle(self,m)
         if "heraldme" == m.cmd:
-            if m.private and not m.identified:
+            if m.private and \
+                    ((self._root.check_identification and \
+                    not m.identified) or \
+                    not self._root.check_identification):
                 self._root.say_no_private(m)
             else:
                 if self._heraldDB.get_herald_nick(m.sender_nick):
@@ -976,7 +987,7 @@ class SystemHandler(MessageHandler):
             self._root.say_only_owners(m)
             return True
         elif self._root.check_identification and not m.identified:
-            self._root.say_only_owners(m)
+            self._root.say_not_identified(m)
             return False
         elif "quit" == m.cmd:
             self.cmd_quit(m,m.rest)
