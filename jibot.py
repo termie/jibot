@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.88 $"[11:-2]
-__date__ = "$Date: 2003/12/19 22:21:11 $"[7:-2]
+__cvsversion__ = "$Revision: 1.89 $"[11:-2]
+__date__ = "$Date: 2003/12/20 01:17:25 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -489,6 +489,13 @@ class jibot(irclib.irc):
 
 	def say_herald(self, m):
 		""" Queue a herald, unless bucket is already full """
+		try:
+			lastTime = self.masternicks[self.NickAka[m.lower()]]['lastherald']
+			if time.time() - lastTime <600:
+				print "didn't herald %s" % m
+				return
+		except:
+			print "no lasttime for %s" % m
 		if (time.time() - self.herald_stamp < 2):
 			self.heraldq = self.heraldq + 1
 		else:
@@ -499,7 +506,14 @@ class jibot(irclib.irc):
 			else:
 			    self.cmd_def_all(m,0)
 			self.herald_stamp = time.time()
-
+			try:
+				self.masternicks[self.NickAka[m.lower()]]['lastherald'] = self.herald_stamp
+			except:
+				#fix broken masternicks
+				self.NickAka[m.lower()] = m.lower()
+				self.addnick(m)
+				self.masternicks[self.NickAka[m.lower()]]['lastherald'] = self.herald_stamp
+			
 	""" 'Channel' commands """
 	def cmd_cool(self, m):
 		coolphrases = ('Cool? we keep drinks in %s', '%s\'s undergarments are full of dry ice', 'ice forms on %s\'s upper slopes')
