@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.74 $"[11:-2]
-__date__ = "$Date: 2003/12/05 10:31:00 $"[7:-2]
+__cvsversion__ = "$Revision: 1.75 $"[11:-2]
+__date__ = "$Date: 2003/12/05 10:48:18 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -753,6 +753,36 @@ class jibot(irclib.irc):
 	def cmd_isbn(self, m):
 		self.cmd_asin(m)
 	
+	def cmd_learn_first(self, m):
+		if (self.msg == 0):
+			""" Learn a definition """
+			if (m == ""):
+				return
+			words = m.split()
+			if (len(words) < 3):
+				self.say('I need at least 3 words with an \'is\' in the middle')
+				return
+			try:
+				pos = words.index('is') 
+			except:
+				self.say('I need an \'is\' in the middle')
+				return
+			
+			concept = string.lower(' '.join(words[:pos]))
+			definition = ' '.join(words[pos+1:])
+			if (not self.definitions.has_key(concept)):
+				self.definitions[concept] = []
+			self.definitions[concept][0] = definition
+			try:
+				f = open(self.def_file, 'w')
+				pickle.dump(self.definitions, f)
+				f.close()
+				self.say('I understand now, Dr. Chandra; %s is %s' % (concept, " & ".join(self.definitions[concept])))
+			except:
+				pass
+		else:
+			self.say('I can only do that in a channel.')
+	
 	def cmd_learn(self, m):
 		if (self.msg == 0):
 			""" Learn a definition """
@@ -908,6 +938,17 @@ class jibot(irclib.irc):
 				self.say("%s is on %s's favorites list" % (m,self.queen))
 			if m in self.disfavorites:
 				self.say("%s is on %s's least favorites list" % (m,self.queen))
+
+	def cmd_firstdef(self, m):
+		if (m == ""):
+			self.say("Braindump is at http://jibot.joi.ito.com:8080/braindump.rpy")
+			return
+		words = m.split()
+		try:
+			pos = words.index('is') 
+			self.cmd_learn_first(m) #ie do this if there is an 'is' involved
+		except:
+			self.cmd_def_first(m)
 
 	def cmd_def(self, m):
 		""" Display a stored definition """
