@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.42 $"[11:-2]
-__date__ = "$Date: 2003/08/24 15:59:28 $"[7:-2]
+__cvsversion__ = "$Revision: 1.43 $"[11:-2]
+__date__ = "$Date: 2003/08/26 16:40:49 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -757,6 +757,10 @@ class jibot(irclib.irc):
 					unknownphrases = ("It's puzzling, I don't think I've ever seen anything like %s before","No-one has dished the dirt on %s yet",
 					"Perhaps if %s makes friends with jeannie I'll say something nice next time", "Are you new here, %s?","Is %s a pseudonym?")
 					self.say(unknownphrases[int(random.random() *len(unknownphrases))] %(m))
+				if m in self.favorites:
+					self.say("%s is on %s's favorites list" % (m,self.queen))
+				if m in self.disfavorites:
+					self.say("%s is on %s's least favorites list" % (m,self.queen))
 		
 	def cmd_introduce(self, m):
 		""" Introductions """
@@ -828,6 +832,24 @@ class jibot(irclib.irc):
 			self.disfavorites.remove(nick)
 		self.saveFavors()
 
+	def cmd_unfavor(self, nick):
+		if (not self.sendernick == self.queen):
+			self.say("Only the Queen has favorites")
+			return	
+		if nick in self.favorites:
+			self.favorites.remove(nick)
+			self.say("%s is no longer looked upon with favor" % (nick))
+		self.saveFavors()
+
+	def cmd_pardon(self, nick):
+		if (not self.sendernick == self.queen):
+			self.say("Only the Queen has favorites")
+			return	
+		if nick in self.disfavorites:
+			self.disfavorites.remove(nick)
+			self.say("%s is no longer looked upon with disfavor" % (nick))
+		self.saveFavors()
+
 	def cmd_disfavor(self, nick):
 		if (not self.sendernick == self.queen):
 			self.say("Only the Queen has favorites")
@@ -845,10 +867,10 @@ class jibot(irclib.irc):
 			self.say("Only the Queen has favorites")
 		else:
 			if len (self.favorites) >0:
-				self.say("On  %s's favorites list: %s" % ",".join(self.favorites))
+				self.say("On %s's favorites list: %s" % (self.sendernick, ",".join(self.favorites)))
 			if len (self.disfavorites) >0:
-				self.say("On %s';s least favorites list: %s" % (self,sendernick                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ",".join(self.disfavorites))
-		
+				self.say("On %s's least favorites list: %s" % (self.sendernick, ",".join(self.disfavorites)))
+
 if __name__ == '__main__':
 	while (1):
 		try:
