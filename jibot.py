@@ -9,22 +9,13 @@
 #	This script is based in simpleclient.py
 #		(C) 1999  Erno Kuusela <erno@iki.fi> 
 
-	
-
-TODO
-----
-- Check new links for channel regular user' blogs
-- Jargon interface
-  http://scripts.incutio.com/xmlrpc/jargon-file-with-python.php
-
-
 __author__ = "Victor R. Ruiz <rvr@infoastro.com>"
 __contributors__ = ['Kevin Marks']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.3"
-__cvsversion__ = "$Revision: 1.2 $"[11:-2]
-__date__ = "$Date: 2003/06/09 21:46:36 $"[7:-2]
+__cvsversion__ = "$Revision: 1.3 $"[11:-2]
+__date__ = "$Date: 2003/06/09 22:17:28 $"[7:-2]
 
 import string, sys, os, re
 import random, time
