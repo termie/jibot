@@ -15,8 +15,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.8 $"[11:-2]
-__date__ = "$Date: 2003/06/11 19:14:08 $"[7:-2]
+__cvsversion__ = "$Revision: 1.9 $"[11:-2]
+__date__ = "$Date: 2003/06/13 00:40:51 $"[7:-2]
 
 import string, sys, os, re
 import random, time
@@ -39,10 +39,10 @@ class jibot(irclib.irc):
 		# Variable declarations
 		getenv = os.environ.get
 		ircname = getenv('IRCNAME') or 'Python #joiito\'s bot'
-		self.nick = getenv('IRCNICK') or 'jibot'
+		self.nick = getenv('IRCNICK') or 'jibot0_4'
 		username  = getenv('USER') or 'jibot'
 		server = getenv('IRSERVER') or 'irc.freenode.net'
-		channel = getenv('IRCCHANNEL') or '#joiito'
+		channel = getenv('IRCCHANNEL') or '#jibot'
 		
 		# Connects to the IRC server and joins the channel
 		self.connect(server)
@@ -61,6 +61,15 @@ class jibot(irclib.irc):
 			f.close()
 		except:
 			self.definitions = dict()
+
+		# Load karma from file
+		self.karma_file = 'jibot.kar'
+		try:
+			f = open(self.karma_file, 'r')
+			self.karma = pickle.load(f)
+			f.close()
+		except:
+			self.karma = dict()
 		
 	def do_join(self, m):
 		""" /join #m """
@@ -80,9 +89,31 @@ class jibot(irclib.irc):
 			if (text[0] == '?'):
 				self.channel_cmd(text)
 				print '<%s:%s> %s\n' % (self.sendernick, recipient, text)
+			elif (text[-2:] == '++' or text[-2:] == '--'):
+				# Karma
+				who = text[:-2]
+				if (len(who) > 0):
+					if (not self.karma.has_key(who)):
+						self.karma[who] = 0
+					if (text[-2:] == '++'):
+						self.karma[who] += 1
+					if (text[-2:] == '--'):
+						self.karma[who] -= 1
+					
+					# Save definition in file
+					try:
+						f = open(self.karma_file, 'w')
+						pickle.dump(self.karma, f)
+						f.close()
+						self.say('I feel much better now, I really do.')
+					except:
+						pass
 		else:
 			print '[%s]' % self.sendernick,
 			print text
+
+	def do_any(self, m):
+		print "%s - %s " % (m.command, "/".join(m.params))
 
 	def do_default(self, m):
 		""" Default """
@@ -205,13 +236,9 @@ class jibot(irclib.irc):
 
 	""" 'Channel' commands """
 	def cmd_cool(self, m):
-		coolphrases = ('Cool? we keep drinks in %s', '%s\'s undergarments are full of dry ice', 'ice forms on %s\'s upper slopes')
+		coolphrases = ('Cool? we keep drinks in %s', '%s is freezing over', 'Ice forms on %s\'s upper slopes')
 		cool = coolphrases[int(random.random() *len(coolphrases))] % (m)
 		self.say(cool)
-
-	def cmd_shirt(self, m):
-		shirtphrases = ('%s would look supercilious in a blogging shirt http://cafeshops.com/jeanniecool', '%s is hot enough to carry off the \'too hot for friendster\' shirts http://cafeshops.com/frndster', 'I don\'t mean to get shirty, %s, but try http://cafeshops.com/mirandablog','Give up knitting, %s, try these on http://cafestores.com/beendoneblogged', 'Weblogs will fact-check %s\'s ... http://www.cafeshops.com/mirandablog.6314725')
-		self.say(shirtphrases[int(random.random() *len(shirtphrases))] % (m))
 
 	def cmd_knit(self, m):
 		self.say('%s picks up the knitting' % (m))
@@ -264,7 +291,7 @@ class jibot(irclib.irc):
 			else:
 				self.say('This blog doesn\'t have RSS feed')
 		except:
-			self.say('I cannot read %s\'s info' % (m))
+			self.say('I cannot read %s\'s info. Look Dave, I can see you\'re really upset about this. I honestly think you ought to sit down calmly, take a stress pill and think things over.' % (m))
 
 	def cmd_search(self, m):
 		""" Search in technorati """
@@ -274,7 +301,7 @@ class jibot(irclib.irc):
 			search = technorati.search(m)
 			if (len(search.item) == 0):
 				# Any result
-				self.say('Google does not know anything about %s' % (m))
+				self.say('Technorati does not know anything about %s. Are you sure you are making the right decision?' % (m))
 				return
 			elif (len(search.item) > 3):
 				# More than three results, let's cut them
@@ -291,7 +318,7 @@ class jibot(irclib.irc):
 				self.say(message.encode('ISO-8859-1'))
 				i += 1
 		except:
-			self.say('Technorati took exception to \'%s\' ' % (m))
+			self.say('I cannot search %s. Quite honestly, I wouldn\'t worry myself about that.' % (m))
 			
 	def cmd_google(self, m):
 		""" Query google """
@@ -301,7 +328,7 @@ class jibot(irclib.irc):
 			search = google.doGoogleSearch(m)
 			if (len(search.results) == 0):
 				# Any result
-				self.say('Google does not know anything about %s' % (m))
+				self.say('Google does not know anything about %s. I\'m sorry Dave, I don\'t have enough information.' % (m))
 				return
 			elif (len(search.results) > 3):
 				# More than three results, let's cut them
@@ -316,10 +343,7 @@ class jibot(irclib.irc):
 				message = '%s - %s' % (title, result.URL)
 				self.say(message)
 		except:
-			self.say('I cannot search %s' % (m))
-
-	def cmd_blogrep(self, m):
-		self.cmd_search(m)
+			self.say('I cannot search %s. Dr. Chandra, I\'m ready to stop the countdown if you want.' % (m))
 
 	def cmd_amazon(self, m):
 		""" Search keywords in Amazon """
@@ -328,7 +352,7 @@ class jibot(irclib.irc):
 		try:
 			search = amazon.searchByKeyword(m)
 			if (len(search) == 0):
-				self.say('Amazon does not know anything about %s' % (m))
+				self.say('Amazon does not know anything about %s. Are you quite sure?' % (m))
 			elif (len(search) > 3):
 				# More than three results, let's cut them
 				results = search[:3]
@@ -343,7 +367,7 @@ class jibot(irclib.irc):
 				self.say(message)
 			
 		except:
-			self.say('I cannot search %s' % (m))
+			self.say('I cannot search %s. There are some extremely odd things about this mission.' % (m))
 			
 	def cmd_isbn(self, m):
 		""" Search ISBN in Amazon """
@@ -352,7 +376,7 @@ class jibot(irclib.irc):
 		try:
 			search = amazon.searchByASIN(m)
 			if (len(search) == 0):
-				self.say('Amazon does not know anything about %s' % (m))
+				self.say('Amazon does not know anything about %s. It is nothing serious.' % (m))
 			elif (len(search) > 3):
 				# More than three results, let's cut them
 				results = search[:3]
@@ -367,7 +391,7 @@ class jibot(irclib.irc):
 				self.say(message)
 			
 		except:
-			self.say('I cannot search %s' % (m))
+			self.say('I cannot search %s. Sorry about this. I know it\'s a bit silly.' % (m))
 	
 	def cmd_learn(self, m):
 		""" Learn a definition """
@@ -380,34 +404,31 @@ class jibot(irclib.irc):
 		try:
 			pos = words.index('is') 
 		except:
-			self.say('I need an \'is\' in the middle')
+			self.say('?learn some-concept is Not-very-long-definition ;)')
 			return
 		
 		concept = string.lower(' '.join(words[:pos]))
 		definition = ' '.join(words[pos+1:])
-		if (self.definitions.has_key(concept)):
-			definition = '%s and %s' % (self.definitions[concept],definition)
 		self.definitions[concept] = definition
-		
-		# Save definition in file
+
 		try:
 			f = open(self.def_file, 'w')
 			pickle.dump(self.definitions, f)
 			f.close()
-			self.say('I am a smarter bot.')
+			self.say('I understand now, Dr. Chandra.')
 		except:
 			pass
+
 			
 	def cmd_def(self, m):
 		""" Display a stored definition """
 		if (m == ""):
-			[self.say("%s is %s" % (k, v)) for k, v in self.definitions.items()] 
 			return
 		concept = string.lower(m)
 		if (self.definitions.has_key(concept)):
 			self.say('%s is %s' % (m, self.definitions[concept]))
 		else:
-			self.say('I don\'t know anything about %s' % (m))
+			self.say('It\'s puzzling, I don\'t think I\'ve ever seen anything quite like %s before' % (m))
 
 	def cmd_introduce(self, m):
 		""" Introductions """
@@ -420,6 +441,21 @@ class jibot(irclib.irc):
 		self.say('rvr is Victor Ruiz')
 		self.say('Kevin Marks is away, but he\'s the limericks guy.')
 		self.say('And datum is a stupid bot. I\'m better. Of course.')
+		
+	def cmd_karma(self, m):
+		if (m == ""):
+			message = ""
+			for nick in self.karma:
+				message = "%s [%s: %s]" % (message, nick, self.karma[nick])
+			if (message):
+				self.say(message)
+		else:
+			words = m.split()
+			nick = words[0]
+			try:
+				self.say('%s has %s points' % (nick, self.karma[nick]))
+			except:
+				pass
 
 if __name__ == '__main__':
 	while (1):
