@@ -15,8 +15,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.16 $"[11:-2]
-__date__ = "$Date: 2003/06/13 04:45:48 $"[7:-2]
+__cvsversion__ = "$Revision: 1.17 $"[11:-2]
+__date__ = "$Date: 2003/06/16 23:56:02 $"[7:-2]
 
 import string, sys, os, re
 import random, time
@@ -103,14 +103,13 @@ class jibot(irclib.irc):
 						self.karma[who] += 1
 					if (text[-2:] == '--'):
 						self.karma[who] -= 1
-					
 					# Save definition in file
 					try:
 						f = open(self.karma_file, 'w')
 						pickle.dump(self.karma, f)
 						f.close()
-						self.say('%s has %d points now')
-						# self.say('Quite honestly, I wouldn\'t worry myself about that.' % (who, self.karma[who]))
+						self.say('%s has %d points now' % (who, self.karma[who]))
+						# self.say('Quite honestly, I wouldn\'t worry myself about that.')
 					except:
 						pass
 		else:
