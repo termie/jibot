@@ -2,6 +2,7 @@
 
 import cPickle as pickle
 import sqlite
+import re
 
 class JibotDatabase:
     """ A very simple database interface for jibot, not PEP249 Compatible """
@@ -307,6 +308,8 @@ class DefWrapper(DatabaseWrapper):
         self._join_char_short=join_char_short
         self._join_char_long=join_char_long
         self._db_join="&"
+        self._db_split=re.compile("^and\s|^%s\s|\sand\s|\s%s\s"\
+            %(self._db_join,self._db_join))
     
     def has_def(self,key):
         return self._database.has_key(key)
@@ -316,7 +319,7 @@ class DefWrapper(DatabaseWrapper):
         out = self._database.get(key)
         # We may be able to get rid of this once all old defs have been re-parsed...    
         if None != out:
-            out = out.replace(" and ", " %s "%(self._db_join)).split(" %s "%(self._db_join))
+            out = self._db_split.split(out)
             out = filter(lambda x: len(x) > 3, out)
             # Some auto correction for the database: removes the entry if
             # there are no good defs...
@@ -349,11 +352,11 @@ class DefWrapper(DatabaseWrapper):
             s = (" %s "%(self._db_join)).join(s)
         if self.has_def(key):
             def_list = self.get_def(key)
-            s_list = s.split(" and ")
+            s_list = self._db_split.split(s)
             for s in s_list:
-                def_list.append(s)
+                s = s.strip()
+                if 0 < len(s): def_list.append(s)
             self._database.set(key,(" %s "%(self._db_join)).join(def_list))
-            
         else:
             self._database.put(key,s)
         
@@ -363,17 +366,21 @@ class DefWrapper(DatabaseWrapper):
         self._database.set(key,s)
     
     def remove_def(self,key,s):
-        try:
-            def_list = self.get_def(key)
-            i = def_list.index(s)
-            del def_list[i]
-            if 1 > len(def_list):
-                self._database.remove(key)
-            else:
-                self._database.set(key,(" %s "%(self._db_join)).join(def_list))
-            return True
-        except:
-            return False
+        rem_list = re.split("^and\s|^%s\s|\sand\s|\s%s\s"%(self._db_join,self._db_join), s)
+        def_list = self.get_def(key)
+        bad_list = [] #The defs that couldn't be removed
+        for x in rem_list:
+            if 1 > len(x): continue
+            try:
+                i = def_list.index(x)
+                del def_list[i]
+            except:
+                bad_list.append(x)
+        if 1 > len(def_list):
+            self._database.remove(key)
+        else:
+            self._database.set(key,(" %s "%(self._db_join)).join(def_list))
+        return bad_list #The ?forget function will have to check this list
     
 class HeraldWrapper(DatabaseWrapper):
     def __init__(self,database):
