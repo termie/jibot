@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.32 $"[11:-2]
-__date__ = "$Date: 2003/07/08 06:09:11 $"[7:-2]
+__cvsversion__ = "$Revision: 1.33 $"[11:-2]
+__date__ = "$Date: 2003/07/21 10:56:28 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -448,6 +448,13 @@ class jibot(irclib.irc):
 	def cmd_whois(self, m):
 		self.cmd_def(m)
 
+	def cmd_savedefs(self, m):
+		f = open(m, 'w')
+		for k,v in self.definitions.items():
+			for defn in v:
+				f.write("%s is %s\n" % (k,defn))
+		f.close()
+
 	def cmd_amazon(self, m):
 		""" Search keywords in Amazon """
 		if (m == ""):
@@ -514,7 +521,10 @@ class jibot(irclib.irc):
 		definition = ' '.join(words[pos+1:])
 		if (not self.definitions.has_key(concept)):
 			self.definitions[concept] = []
-		self.definitions[concept].append(definition)
+		try:
+			i = self.definitions[concept].index(definition)
+		except:
+			self.definitions[concept].append(definition)
 
 		try:
 			f = open(self.def_file, 'w')
