@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.67 $"[11:-2]
-__date__ = "$Date: 2003/12/05 01:12:38 $"[7:-2]
+__cvsversion__ = "$Revision: 1.68 $"[11:-2]
+__date__ = "$Date: 2003/12/05 01:16:58 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -190,17 +190,14 @@ class jibot(irclib.irc):
 			if (text.startswith(self.cmdchars)):
 				self.channel_cmd(text)
 				print '<%s:%s> %s\n' % (self.sendernick, recipient, text)
-			elif (text[-2:] == '++' or text[-2:] == '--'):
-				# Karma
-				words = text.split()
-				who = words[-1][:-2].lower()
-				if (len(who) > 16):
-					#self.say('That\'s a lengthy nick, Dave. Ignoring.')
-					pass
-				else:
-					self.handle_karma(who, words[-1])
-					#self.say('%s has %d points now' % (who, self.karma[who]))
-					#self.say('Quite honestly, I wouldn\'t worry myself about that.')
+			else:
+				# Check each word for karma
+				for word in text.split():
+					if (len(word) > 2 and (word[-2:] == '++' or word[-2:] == '--')):
+						who = word[:-2].lower()
+						self.handle_karma(who, word)
+						#self.say('%s has %d points now' % (who, self.karma[who]))
+						#self.say('Quite honestly, I wouldn\'t worry myself about that.')
 		else:
 			print '[%s]' % self.sendernick, 'to (%s)' % recipient,
 			print text
