@@ -178,7 +178,6 @@ class JibotInterface:
         self.send(JibotMessage(root=self,
                                command=self.speech,
                                params=[self._cur_channel,s]))
-        time.sleep(1.0)
     
     def say_no_private(self,m):
         self.say("I can only do that in a channel")
@@ -200,7 +199,6 @@ class JibotInterface:
         self.send(JibotMessage(root=self,
                                command='PRIVMSG',
                                params=[self._cur_channel,s]))
-        time.sleep(1.5)
 
     def quit(self,s):
         """ some irc networks have this problem with early quits, to prevent
@@ -242,7 +240,7 @@ class JibotMessage(irclib.IrcMessage):
     def parse(self,line):
         self.from_string(line)
         self._root.logger.debug("Parsing: %s"%(line))
-        if "NICK" == self.command or "JOIN" == self.command:
+        if "JOIN" == self.command:
             self.channel = self.params[0]
         if "PRIVMSG" == self.command:
             self.recipient = self.params[0]
@@ -1335,12 +1333,17 @@ class BlogHandler(MessageHandler):
             self._root.say_no_private(m)
             return True
         if "" == m.rest:
+            self.say_blog_location(m)
             return True
         if "blog" == m.cmd:
             self.cmd_blog(m,m.rest)
             return True
         else:
             return False
+
+    def say_blog_location(self,m):
+        self._root.say('My blog is located at: http://hashjoiito.bloxus.com')
+        return True
 
     def cmd_blog(self,m,text):
         """ Add a blog entry """
