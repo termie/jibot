@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.45 $"[11:-2]
-__date__ = "$Date: 2003/09/04 03:07:37 $"[7:-2]
+__cvsversion__ = "$Revision: 1.46 $"[11:-2]
+__date__ = "$Date: 2003/09/04 11:16:57 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -44,7 +44,7 @@ class jibot(irclib.irc):
 		getenv = os.environ.get
 		ircname = getenv('IRCNAME') or 'Python #joiito\'s bot'
 		self.nick = getenv('IRCNICK') or 'jibot'
-		username  = getenv('USER') or 'jibot'
+		username  = getenv('USER') or 'jibot|test'
 		server = getenv('IRSERVER') or 'irc.freenode.net'
 		channel = getenv('IRCCHANNEL') or '#joiito'
 		self.queen = 'jeanniecool'
