@@ -15,8 +15,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.7 $"[11:-2]
-__date__ = "$Date: 2003/06/10 19:55:54 $"[7:-2]
+__cvsversion__ = "$Revision: 1.8 $"[11:-2]
+__date__ = "$Date: 2003/06/11 19:14:08 $"[7:-2]
 
 import string, sys, os, re
 import random, time
@@ -205,9 +205,13 @@ class jibot(irclib.irc):
 
 	""" 'Channel' commands """
 	def cmd_cool(self, m):
-		coolphrases = ('Cool? we keep drinks in %s', '%s is freezing over', 'Ice forms on %s\'s upper slopes')
+		coolphrases = ('Cool? we keep drinks in %s', '%s\'s undergarments are full of dry ice', 'ice forms on %s\'s upper slopes')
 		cool = coolphrases[int(random.random() *len(coolphrases))] % (m)
 		self.say(cool)
+
+	def cmd_shirt(self, m):
+		shirtphrases = ('%s would look supercilious in a blogging shirt http://cafeshops.com/jeanniecool', '%s is hot enough to carry off the \'too hot for friendster\' shirts http://cafeshops.com/frndster', 'I don\'t mean to get shirty, %s, but try http://cafeshops.com/mirandablog','Give up knitting, %s, try these on http://cafestores.com/beendoneblogged', 'Weblogs will fact-check %s\'s ... http://www.cafeshops.com/mirandablog.6314725')
+		self.say(shirtphrases[int(random.random() *len(shirtphrases))] % (m))
 
 	def cmd_knit(self, m):
 		self.say('%s picks up the knitting' % (m))
@@ -266,8 +270,7 @@ class jibot(irclib.irc):
 		""" Search in technorati """
 		if (m == ""):
 			return
-		if (1):
-		#try:
+		try:
 			search = technorati.search(m)
 			if (len(search.item) == 0):
 				# Any result
@@ -287,8 +290,8 @@ class jibot(irclib.irc):
 				message = '%s - %s' % (name, results[i].url)
 				self.say(message.encode('ISO-8859-1'))
 				i += 1
-		#except:
-		#	self.say('I cannot search %s\'s ' % (m))
+		except:
+			self.say('Technorati took exception to \'%s\' ' % (m))
 			
 	def cmd_google(self, m):
 		""" Query google """
@@ -314,6 +317,9 @@ class jibot(irclib.irc):
 				self.say(message)
 		except:
 			self.say('I cannot search %s' % (m))
+
+	def cmd_blogrep(self, m):
+		self.cmd_search(m)
 
 	def cmd_amazon(self, m):
 		""" Search keywords in Amazon """
@@ -374,16 +380,18 @@ class jibot(irclib.irc):
 		try:
 			pos = words.index('is') 
 		except:
-			self.say('?learn some-concept is Not-very-long-definition ;)')
+			self.say('I need an \'is\' in the middle')
 			return
 		
 		concept = string.lower(' '.join(words[:pos]))
 		definition = ' '.join(words[pos+1:])
+		if (self.definitions.has_key(concept)):
+			definition = '%s and %s' % (self.definitions[concept],definition)
 		self.definitions[concept] = definition
 		
 		# Save definition in file
 		try:
-			f = open(self.def_file, 'a')
+			f = open(self.def_file, 'w')
 			pickle.dump(self.definitions, f)
 			f.close()
 			self.say('I am a smarter bot.')
@@ -393,6 +401,7 @@ class jibot(irclib.irc):
 	def cmd_def(self, m):
 		""" Display a stored definition """
 		if (m == ""):
+			[self.say("%s is %s" % (k, v)) for k, v in self.definitions.items()] 
 			return
 		concept = string.lower(m)
 		if (self.definitions.has_key(concept)):
