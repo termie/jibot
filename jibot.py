@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.89 $"[11:-2]
-__date__ = "$Date: 2003/12/20 01:17:25 $"[7:-2]
+__cvsversion__ = "$Revision: 1.90 $"[11:-2]
+__date__ = "$Date: 2003/12/20 08:40:19 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -333,6 +333,7 @@ class jibot(irclib.irc):
 				self.say_herald(nick)
 		elif (m.command == 'QUIT') or (m.command == 'PART'):
 			oldnick = string.split(m.prefix, '!')[0]
+			self.set_herald_timestamp(oldnick) # se this here to supress heralding on rapid rejoins
 			if (self.nicks.has_key(oldnick)):
 				del self.nicks[oldnick]
 		else:
@@ -487,6 +488,16 @@ class jibot(irclib.irc):
 				  params = [recipient, rest]))
 		print '-->', recipient, ':', rest
 
+	def set_herald_timestamp(self,m):
+		self.herald_stamp = time.time()
+		try:
+			self.masternicks[self.NickAka[m.lower()]]['lastherald'] = self.herald_stamp
+		except:
+			#fix broken masternicks
+			self.NickAka[m.lower()] = m.lower()
+			self.addnick(m)
+			self.masternicks[self.NickAka[m.lower()]]['lastherald'] = self.herald_stamp
+		
 	def say_herald(self, m):
 		""" Queue a herald, unless bucket is already full """
 		try:
@@ -505,14 +516,7 @@ class jibot(irclib.irc):
 			    self.cmd_def_first(m)
 			else:
 			    self.cmd_def_all(m,0)
-			self.herald_stamp = time.time()
-			try:
-				self.masternicks[self.NickAka[m.lower()]]['lastherald'] = self.herald_stamp
-			except:
-				#fix broken masternicks
-				self.NickAka[m.lower()] = m.lower()
-				self.addnick(m)
-				self.masternicks[self.NickAka[m.lower()]]['lastherald'] = self.herald_stamp
+			self.set_herald_timestamp(m)
 			
 	""" 'Channel' commands """
 	def cmd_cool(self, m):
