@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.92 $"[11:-2]
-__date__ = "$Date: 2004/01/16 21:17:30 $"[7:-2]
+__cvsversion__ = "$Revision: 1.93 $"[11:-2]
+__date__ = "$Date: 2004/01/20 09:56:08 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -965,8 +965,7 @@ class jibot(irclib.irc):
 			self.say('I can only do that in a channel.')
 
 	def cmd_herald_unknown(self, m):
-		unknownphrases = ("It's puzzling, I don't think I've ever seen anything like %s before","No-one has dished the dirt on %s yet",
-		"Perhaps if %s makes friends with jeannie I'll say something nice next time", "Are you new here, %s?","Is %s a pseudonym?")
+		unknownphrases = ("Welcome, %s; is this your first time here?", "Willkommen, bienvenue, welcome %s, im Cabaret, au Cabaret, to Cabaret", "Milords, Ladies and Gentlemen, please welcome %s")
 		self.say(unknownphrases[int(random.random() *len(unknownphrases))] %(m))
 
 	def cmd_def_unknown(self, m,echoUnknown=1):
