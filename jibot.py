@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.73 $"[11:-2]
-__date__ = "$Date: 2003/12/05 04:03:10 $"[7:-2]
+__cvsversion__ = "$Revision: 1.74 $"[11:-2]
+__date__ = "$Date: 2003/12/05 10:31:00 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -213,7 +213,7 @@ class jibot(irclib.irc):
 		recipient, text = m.params
 		sender = m.prefix
 		self.sendernick = string.split(sender, '!')[0]
-		if (recipient == self.nick or recipient in irclib.NICKCHARS):
+		if (recipient == self.nick):
 			self.curchannel = self.sendernick
 			self.msg = 1
 		else:
