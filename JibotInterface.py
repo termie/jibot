@@ -913,6 +913,9 @@ class KarmaHandler(MessageHandler):
                     
     def cmd_karma(self,m,word=None):
         if None == word: word = m.rest
+        if 0 == len(word):
+            self.say_karma_dump()
+            return
         karma = self._karmaDB.get_karma(word)
         self._root.say("%s has %d %s"%(word,karma,m.pl("point",karma)))
         return True
@@ -926,6 +929,8 @@ class KarmaHandler(MessageHandler):
             self._root.say_only_owners(m)
             return False
         
+    def say_karma_dump(self):
+        self._root.say("Karma Dump available at: %s"%("nowhere, yet"))
 
 class SystemHandler(MessageHandler):
     def __init__(self,root,name="SystemHandler"):
