@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.37 $"[11:-2]
-__date__ = "$Date: 2003/08/07 03:03:28 $"[7:-2]
+__cvsversion__ = "$Revision: 1.38 $"[11:-2]
+__date__ = "$Date: 2003/08/07 04:20:48 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -32,7 +32,7 @@ class jibot(irclib.irc):
 
 	def __init__(self):
 		""" Constructor """
-		self.cmdchars = '~'
+		self.cmdchars = '?'
 		self.curchannel = None
 		self.wannaquit = 0
 		self.hasquit = 0
