@@ -945,12 +945,14 @@ class KarmaHandler(MessageHandler):
         elif "savekarmas" == m.cmd:
             self.cmd_savekarmas(m)
             return True
-        else:
+        elif not m.private:
             for word in m.text.split():
                 if 2 < len(word) and word[-2:] == "++":
                     self._karmaDB.add_karma(word[:-2])
                 elif 2 < len(word) and word[-2:] == "--":
                     self._karmaDB.sub_karma(word[:-2])
+            return True
+        else:
             return True
                     
     def cmd_karma(self,m,word=None):
