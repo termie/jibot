@@ -591,7 +591,7 @@ class FavorHandler(MessageHandler):
             self.say_queen_only(m)
             return True
         if self._root.check_identification and not m.identified:
-            self.say_not_identified(m)
+            self._root.say_not_identified(m)
             return True
         if m.private and not self._root.check_identification:
             self._root.say_no_private(m)
