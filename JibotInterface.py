@@ -871,6 +871,7 @@ class DefHandler(MessageHandler):
                 pos = words.index("is")
                 if m.private:
                     self._root.say_no_private(m)
+                    return True
                 if 1 > pos or pos+1 == len(words):
                     self.say_bad_def()
                     return True
@@ -889,10 +890,10 @@ class DefHandler(MessageHandler):
         return False
     
     def say_bad_def(self):
-        self._root.say("I need atleast 3 words with an 'is' in the middle")
+        self._root.say("I need at least 3 words with an 'is' in the middle")
     
     def say_def_dump(self):
-        self._root.say("Braindump available at: %s"%("nowhwere, yet"))
+        self._root.say("Braindump available at: %s"%("nowhere, yet"))
     
     def cmd_learn(self,m,concept,definition):
         self.cmd_def(m,concept,definition)
