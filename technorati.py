@@ -61,8 +61,8 @@ Other usage notes:
 
 __author__ = "Mark Pilgrim (f8dy@diveintomark.org)"
 __version__ = "0.1"
-__cvsversion__ = "$Revision: 2.0 $"[11:-2]
-__date__ = "$Date: 2004/04/22 18:32:24 $"[7:-2]
+__cvsversion__ = "$Revision: 2.1 $"[11:-2]
+__date__ = "$Date: 2004/05/19 09:53:56 $"[7:-2]
 __copyright__ = "Copyright (c) 2003 Mark Pilgrim"
 __license__ = "Python"
 
@@ -175,8 +175,13 @@ def unmarshal(element):
         if str(element.tagName) in _intFields:
             rc = int(rc)
         elif str(element.tagName) in _dateFields:
-            year, month, day, hour, minute, second = re.search(r'(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})', rc).groups()
-            rc = (int(year), int(month), int(day), int(hour), int(minute), int(second), 0, 0, 0)
+            dateRet = re.search(r'(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})', rc) or \
+                re.search(r'(\d{4})(\d{2})(\d{2})T(\d{2}):(\d{2}):(\d{2})Z', rc)
+            if not None == dateRet:           
+                year, month, day, hour, minute, second = dateRet.groups()
+                rc = (int(year), int(month), int(day), int(hour), int(minute), int(second), 0, 0, 0)
+            else:
+                rc = (0,0,0,0,0,0,0,0,0)
     return rc
 
 def _buildCosmosURL(url, search_type, start, format, version, license_key):
