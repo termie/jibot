@@ -946,6 +946,9 @@ class KarmaHandler(MessageHandler):
         if "karma" == m.cmd:
             self.cmd_karma(m,m.rest)
             return True
+        elif "whuffie" == m.cmd:
+            self.cmd_karma(m,m.rest)
+            return True
         elif "savekarmas" == m.cmd:
             self.cmd_savekarmas(m)
             return True
