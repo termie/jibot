@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.60 $"[11:-2]
-__date__ = "$Date: 2003/12/01 00:27:37 $"[7:-2]
+__cvsversion__ = "$Revision: 1.61 $"[11:-2]
+__date__ = "$Date: 2003/12/02 11:33:28 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -46,7 +46,7 @@ class jibot(irclib.irc):
 		self.nick = getenv('IRCNICK') or 'jibot'
 		username  = getenv('USER') or 'jibot|test'
 		server = getenv('IRSERVER') or 'irc.freenode.net'
-		inchannels = getenv('IRCCHANNEL') or '#joiito #foocamp'
+		inchannels = getenv('IRCCHANNEL') or '#joiito #mobilewhack'
 		self.channels = inchannels.split()
 		self.queen = 'jeanniecool'
 		self.owners = getenv('JIBOTOWNERS') or ['imajes','JoiIto','rvr', 'KevinMarks']
@@ -673,8 +673,8 @@ class jibot(irclib.irc):
 		except:
 			self.say('I cannot search %s. Sorry about this. I know it\'s a bit silly.' % (m))
 
-	def cmd_isbn(self, m):
-		self.cmd_asin(m)
+def cmd_isbn(self, m):
+	self.cmd_asin(m)
 	
 	def cmd_learn(self, m):
 		""" Learn a definition """
