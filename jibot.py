@@ -14,8 +14,8 @@ __contributors__ = ['Kevin Marks']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.3"
-__cvsversion__ = "$Revision: 1.3 $"[11:-2]
-__date__ = "$Date: 2003/06/09 22:17:28 $"[7:-2]
+__cvsversion__ = "$Revision: 1.4 $"[11:-2]
+__date__ = "$Date: 2003/06/10 14:05:46 $"[7:-2]
 
 import string, sys, os, re
 import random, time
@@ -165,6 +165,8 @@ class jibot(irclib.irc):
 
 	def channel_cmd(self, line):
 		""" Handler of channel commands """
+		if (len(line) < 2):
+			return
 		if line[0] not in self.cmdchars:
 			self.say(line)
 			return
@@ -219,6 +221,7 @@ class jibot(irclib.irc):
 		self.say('?google words - Search words (Google)')
 		self.say('?amazon words - Search words (Amazon)')
 		self.say('?isbn ISBNumber - Search ISBN (Amazon)')
+		self.say 
 	
 	def cmd_info(self, m):
 		""" Display """
@@ -244,7 +247,7 @@ class jibot(irclib.irc):
 					desc = re.compile('(<p>|<br>)').sub(' ', rss['items'][0]['description'].encode('ISO-8859-1'))
 					desc = re.compile('<(.*?)>').sub('', desc)
 					lastupdate = "%02d-%02d-%02d %02d:%02d" % info.lastupdate[:5]
-					self.say('%s\'s lastest post at %s: %s' % (info.name.encode('ISO-8859-1'), lastupdate, desc[:200]))
+					self.say('%s\'s latest post at %s: %s' % (info.name.encode('ISO-8859-1'), lastupdate, desc[:200]))
 				else:
 					self.say('No posts in %s\'s RSS feed' % (info.name.encode('ISO-8859-1')))
 			else:
@@ -352,6 +355,18 @@ class jibot(irclib.irc):
 			
 		except:
 			self.say('I cannot search %s' % (m))
+			
+	def cmd_introduction(self, m):
+		""" Introduction """
+		self.say('Excuse me, Joi Ito has ordered me (yes, really!) to say this:')
+		self.say('dsifry, who doesn\'t seem to be at his computer is the Technorati guy')
+		self.say('Kevin Burton, the newsmonster guy')
+		self.say('Pete is the flash guy. ;-)')
+		self.say('<femtoid> Flash guy?')
+		self.say('Pete is captain flash.')
+		self.say('rvr is Victor Ruiz')
+		self.say('Kevin Marks is away, but he\'s the limericks guy.')
+		self.say('And datum is a stupid bot. I\'m better. Of course.')
 
 if __name__ == '__main__':
 	while (1):
