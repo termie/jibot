@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.39 $"[11:-2]
-__date__ = "$Date: 2003/08/17 07:13:37 $"[7:-2]
+__cvsversion__ = "$Revision: 1.40 $"[11:-2]
+__date__ = "$Date: 2003/08/19 00:30:40 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -27,26 +27,6 @@ import cPickle as pickle
 import technorati, google, amazon
 import irclib, rssparser
 
-import threading
-                
-cmd_def_lock = threading.Lock()
-
-class TimeScheduled(threading.Thread):
-	""" Timer Class -- does not provide mutual exclusion """
-	def __init__(self, function, delay):
-		threading.Thread.__init__(self)
-		self.function = function
-		self.delay = delay
-
-	def run(self):
-		self.alive = 1
-		while self.alive:
-			self.function()
-			time.sleep(self.delay)
-
-	def kill(self):
-		self.alive = 0
-
 class jibot(irclib.irc):
 	""" #joiito's bot class """
 
@@ -55,10 +35,8 @@ class jibot(irclib.irc):
 		self.cmdchars = '?'
 		self.curchannel = None
 		self.wannaquit = 0
-		self.hasquit = 0
-		self.heraldq = []
 		irclib.irc.__init__(self)
-		self.debug = 1
+		#self.debug = 1
 		# Variable declarations
 		getenv = os.environ.get
 		ircname = getenv('IRCNAME') or 'Python #joiito\'s bot'
@@ -66,7 +44,6 @@ class jibot(irclib.irc):
 		username  = getenv('USER') or 'jibot'
 		server = getenv('IRSERVER') or 'irc.freenode.net'
 		channel = getenv('IRCCHANNEL') or '#joiito'
-		self.owners = getenv('JIBOTOWNERS') or ['imajes','JoiIto','rvr', 'KevinMarks']
 		self.herald = 1
 		# Connects to the IRC server and joins the channel
 		self.connect(server)
@@ -138,7 +115,7 @@ class jibot(irclib.irc):
 		self.sendernick = string.split(sender, '!')[0]
 
 		if recipient[0] not in irclib.NICKCHARS:
-			if (text[0] == self.cmdchars):
+			if (text[0] == '?'):
 				self.channel_cmd(text)
 				print '<%s:%s> %s\n' % (self.sendernick, recipient, text)
 			elif (text[-2:] == '++' or text[-2:] == '--'):
@@ -182,22 +159,27 @@ class jibot(irclib.irc):
 		self.addnick(nick)
 		lcNick =string.lower(nick)
 		lcNickAka =string.lower(aliasnick)
+		nickMaster = self.NickAka[lcNick]
 		if (lcNick ==lcNickAka):
 			return
 		if (self.NickAka.has_key(lcNickAka)):
 			if (self.NickAka[lcNickAka] == self.NickAka[lcNick]):
-				pass #already linked
+				return #already linked
 			else:
 				oldnicklist = ((self.masternicks[self.NickAka[lcNickAka]])['nicklist'])[:]
-				for oldnick in oldnicklist:
-					if (string.lower(oldnick) != lcNickAka and string.lower(oldnick) != lcNick):
-						self.addnickalias(nick, oldnick)
-		nickMaster = self.NickAka[lcNick]
-		self.NickAka[lcNickAka] = nickMaster
-		try:
-			i = (self.masternicks[nickMaster])['nicklist'].index(aliasnick)
-		except:
-			(self.masternicks[nickMaster])['nicklist'].append(aliasnick)
+				del self.masternicks[self.NickAka[lcNickAka]]
+		else:
+			oldnicklist = [aliasnick]
+		for oldnick in oldnicklist:
+			lcOldnick = string.lower(oldnick)
+			self.NickAka[lcOldnick] = nickMaster
+			try:
+				i = (self.masternicks[nickMaster])['nicklist'].index(oldnick)
+			except:
+				(self.masternicks[nickMaster])['nicklist'].append(oldnick)
+		self.saveNicks()
+
+	def saveNicks(self):
 		try:
 			f = open(self.NickAka_file, 'w')
 			pickle.dump(self.NickAka, f)
@@ -231,7 +213,7 @@ class jibot(irclib.irc):
 			self.nicks[nick] = nick
 			self.addnick(nick)
 			if (self.herald):
-				self.queue_herald(nick)
+				self.cmd_def(nick)
 		elif (m.command == 'QUIT'):
 			del self.nicks[string.split(m.prefix, '!')[0]]
 			print '%s quit' %(string.split(m.prefix, '!')[0])
@@ -251,21 +233,14 @@ class jibot(irclib.irc):
 	def loop(self):
 		""" Main loop """
 		import select
-		scheduledHerald = TimeScheduled(self.sendherald, 2)
-		scheduledHerald.start()
 		while not self.wannaquit:
 			r, w, e = select.select([self], [], [])
 			if self in r:
 				self.do_one_msg()
-				
-			if (self.hasquit == 1):
-				break
-
 			##if (int(time.time()) % 5 == 0):
 			##	self.checklinks()
 			#if sys.stdin in r:
 			#	self.user_cmd(sys.stdin.readline())
-		scheduledHerald.kill()
 
 	def checklinks():
 		""" Check links 
@@ -312,31 +287,6 @@ class jibot(irclib.irc):
 		self.send(m)
 		time.sleep(1.0)
 
-	def action(self, line):
-		""" performs an action on the channel (eg, /me foo) """
-		if not self.curchannel:
-			print '-- no current channel!'
-			return
-		line = string.rstrip(line)
-		line = '\001ACTION' + line + '\001'  
-		m = irclib.msg(command='PRIVMSG',
-			       params = [self.curchannel, line])
-		self.send(m)
-		time.sleep(1.5)
-
-	def quit(self, line):
-		""" quits the irc network """
-		""" some irc networks have this problem with early quits, to prevent
-		    bot attacks using the quit message, so we should probably check to see
-		    if the bot quit early, and if so, just send a msg rather than the
-		    quit line """
-		line = string.rstrip(line)
-		m = irclib.msg(command='QUIT',
-			       params = [line])
-		self.send(m)
-		time.sleep(1.5)
-		sys.exit()
-		
 	def get_next_word(self, s):
 		""" Next word """
 		foo = string.split(s, None, 1)
@@ -404,7 +354,7 @@ class jibot(irclib.irc):
 		self.say(shirtphrases[int(random.random() *len(shirtphrases))] % (m))
 
 	def cmd_knit(self, m):
-		self.action('%s picks up the knitting' % (m))
+		self.say('%s picks up the knitting' % (m))
 
 	def cmd_aka(self, m):
 		nick = string.lower(m)
@@ -432,8 +382,6 @@ class jibot(irclib.irc):
 		
 	def cmd_help(self, m):
 		""" Show commands """
-		""" FIXME: this needs to understand potential other cmd chars. """
-		
 		self.say('JiBot - #JoiIto\'s bot - http://joi.ito.com/joiwiki/JiBot')
 		self.say('Dictionary and user info: ?learn concept is definition || ?whois concept || ?whatis concept')
 		self.say('Technorati: ?info blog.com || ?last blog.com || ?cosmos blog.com || ?search keywords')
@@ -659,6 +607,22 @@ class jibot(irclib.irc):
 		except:
 			pass
 
+	def cmd_forgetnick(self, oldNick):
+		lcOldNick = string.lower(oldNick)
+		lcNick = string.lower(self.sendernick)
+		if (self.NickAka.has_key(lcOldNick)):
+			if (self.NickAka[lcNick]==self.NickAka[lcOldNick]):
+				nicklist = (self.masternicks[self.NickAka[lcNick]])['nicklist']
+				for nick in nicklist:
+					if (string.lower(nick) == lcOldNick):
+						nicklist.remove(nick)
+				del self.NickAka[lcOldNick]
+				self.saveNicks()
+			else:
+				self.say("%s is not an alias for %s" % (oldNick,self.sendernick))
+		else:
+			self.say("%s is not an nick I know" % (oldNick))
+
 	def cmd_forget(self, m):
 		""" Forget a definition """
 		if (m == ""):
@@ -702,7 +666,6 @@ class jibot(irclib.irc):
 		if (m == ""):
 			#self.say("I know about %s" % (" and ".join(self.definitions.keys())))
 			return
-		cmd_def_lock.acquire()
 		words = m.split()
 		try:
 			pos = words.index('is') 
@@ -723,8 +686,6 @@ class jibot(irclib.irc):
 					"Perhaps if %s makes friends with jeannie I'll say something nice next time", "Are you new here, %s?","Is %s a pseudonym?")
 					self.say(unknownphrases[int(random.random() *len(unknownphrases))] %(m))
 		
-		cmd_def_lock.release()
-
 	def cmd_introduce(self, m):
 		""" Introductions """
 		for k,v in self.nicks.items():
@@ -764,7 +725,6 @@ class jibot(irclib.irc):
 				self.say('%s has %s points' % (nick, self.karma[nick]))
 			except:
 				pass
-
 	def cmd_blog(self, m):
 		if (m == ""):
 			return
@@ -776,26 +736,6 @@ class jibot(irclib.irc):
 		except:
 			self.say('I cannot blog.')
 
-	def queue_herald(self, m):
-		""" Queue a herald, unless bucket is already full """
-		if (len(self.heraldq) < 2):
-			self.heraldq.append(m)
-
-	def sendherald(self):
-		""" Issue a queued herald, if any """
-		if (len(self.heraldq) > 0):
-			self.cmd_def(self.heraldq.pop())
-
-	def cmd_quit(self, m):
-		if (m == ""):
-			return
-		if (self.sendernick in self.owners): 
-			self.quit('%s told me to quit -- %s' % (self.sendernick, m))
-			self.hasquit = 1
-		else:
-			self.say("%s: you can't make me quit!" % (self.sendernick))
-		
-
 if __name__ == '__main__':
 	while (1):
 		try:
@@ -804,7 +744,3 @@ if __name__ == '__main__':
 			
 		except irclib.IrcNetworkError, msg:
 			print 'lost connection,', msg
-
-		except (bot.hasquit == 1):
-			print 'quit command used.'
-			sys.exit()
