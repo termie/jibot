@@ -16,8 +16,8 @@ __contributors__ = ['Kevin Marks', 'Jens-Christian Fischer', 'Joi Ito']
 __copyright__ = "Copyright (c) 2003 Victor R. Ruiz"
 __license__ = "GPL"
 __version__ = "0.4"
-__cvsversion__ = "$Revision: 1.71 $"[11:-2]
-__date__ = "$Date: 2003/12/05 02:31:51 $"[7:-2]
+__cvsversion__ = "$Revision: 1.72 $"[11:-2]
+__date__ = "$Date: 2003/12/05 03:10:18 $"[7:-2]
 
 import string, sys, os, re
 import random, time, xmlrpclib
@@ -204,27 +204,25 @@ class jibot(irclib.irc):
 		recipient, text = m.params
 		sender = m.prefix
 		self.sendernick = string.split(sender, '!')[0]
-		if (recipient == self.nick):
-			#self.curchannel = self.sendernick #use msg
+		if (recipient == self.nick or recipient in irclib.NICKCHARS):
+			self.curchannel = self.sendernick
 			self.msg = 1
 		else:
-			self.msg = 0
 			self.curchannel = recipient
-		if recipient[0] not in irclib.NICKCHARS:
-			if (text.startswith(self.cmdchars)):
-				self.channel_cmd(text)
-				print '<%s:%s> %s\n' % (self.sendernick, recipient, text)
-			else:
-				# Check each word for karma
-				for word in text.split():
-					if (len(word) > 2 and (word[-2:] == '++' or word[-2:] == '--')):
-						who = word[:-2].lower()
-						self.handle_karma(who, word)
-						#self.say('%s has %d points now' % (who, self.karma[who]))
-						#self.say('Quite honestly, I wouldn\'t worry myself about that.')
-		else:
-			print '[%s]' % self.sendernick, 'to (%s)' % recipient,
-			print text
+			self.msg = 0
+		if (text.startswith(self.cmdchars)):
+			self.channel_cmd(text)
+			print '<%s:%s> %s\n' % (self.sendernick, recipient, text)
+		# Karma is only accepted in public.
+		elif (self.msg == 0):
+			# Check each word for karma
+			for word in text.split():
+				if (len(word) > 2 and (word[-2:] == '++' or word[-2:] == '--')):
+					who = word[:-2].lower()
+					self.handle_karma(who, word)
+					#self.say('%s has %d points now' % (who, self.karma[who]))
+					#self.say('Quite honestly, I wouldn\'t worry myself about that.')
+
 	def addnick(self, nick):
 		lcNick = string.lower(nick)
 		if (not self.NickAka.has_key(lcNick)):
@@ -466,7 +464,7 @@ class jibot(irclib.irc):
 
 	def usercmd_msg(self, l):
 		recipient, rest = self.get_next_word(l)
-		self.send(irclib.msg(command = 'PRIVMSG',
+		self.send(irclib.msg(command = self.speech,
 				  params = [recipient, rest]))
 		print '-->', recipient, ':', rest
 
@@ -536,13 +534,15 @@ class jibot(irclib.irc):
 		self.say('Turn on or off heralding: ?herald')
 	
 	def cmd_herald(self, m):
-		if (self.herald):
-			self.herald = 0
-			self.say('stopped heralding')
+		if (self.msg == 0):
+			if (self.herald):
+				self.herald = 0
+				self.say('stopped heralding')
+			else:
+				self.herald = 1
+				self.say('started heralding')
 		else:
-			self.herald = 1
-			self.say('started heralding')
-		
+			self.say('I can only do that in a channel.')
 
 	def cmd_info(self, m):
 		""" Display """
@@ -725,107 +725,119 @@ class jibot(irclib.irc):
 		self.cmd_asin(m)
 	
 	def cmd_learn(self, m):
-		""" Learn a definition """
-		if (m == ""):
-			return
-		words = m.split()
-		if (len(words) < 3):
-			self.say('I need at least 3 words with an \'is\' in the middle')
-			return
-		try:
-			pos = words.index('is') 
-		except:
-			self.say('I need an \'is\' in the middle')
-			return
-		
-		concept = string.lower(' '.join(words[:pos]))
-		definition = ' '.join(words[pos+1:])
-		if (not self.definitions.has_key(concept)):
-			self.definitions[concept] = []
-		try:
-			i = self.definitions[concept].index(definition)
-		except:
-			self.definitions[concept].append(definition)
+		if (self.msg == 0):
+			""" Learn a definition """
+			if (m == ""):
+				return
+			words = m.split()
+			if (len(words) < 3):
+				self.say('I need at least 3 words with an \'is\' in the middle')
+				return
+			try:
+				pos = words.index('is') 
+			except:
+				self.say('I need an \'is\' in the middle')
+				return
+			
+			concept = string.lower(' '.join(words[:pos]))
+			definition = ' '.join(words[pos+1:])
+			if (not self.definitions.has_key(concept)):
+				self.definitions[concept] = []
+			try:
+				i = self.definitions[concept].index(definition)
+			except:
+				self.definitions[concept].append(definition)
 
-		try:
-			f = open(self.def_file, 'w')
-			pickle.dump(self.definitions, f)
-			f.close()
-			self.say('I understand now, Dr. Chandra; %s is %s' % (concept, " & ".join(self.definitions[concept])))
-		except:
-			pass
+			try:
+				f = open(self.def_file, 'w')
+				pickle.dump(self.definitions, f)
+				f.close()
+				self.say('I understand now, Dr. Chandra; %s is %s' % (concept, " & ".join(self.definitions[concept])))
+			except:
+				pass
+		else:
+			self.say('I can only do that in a channel.')
 
 	def cmd_forgetnick(self, oldNicks):
-		nickList = oldNicks.split()
-		for oldNick in nickList:
-			lcOldNick = string.lower(oldNick)
-			lcNick = string.lower(self.sendernick)
-			if (self.NickAka.has_key(lcOldNick)):
-				if (self.NickAka[lcNick] == self.NickAka[lcOldNick]):
-					nicklist = (self.masternicks[self.NickAka[lcNick]])['nicklist']
-					for nick in nicklist:
-						if (string.lower(nick) == lcOldNick):
-							nicklist.remove(nick)
-					del self.NickAka[lcOldNick] #remove mapping
-					self.addnick(oldNick) #make clean mapping - ie fresh masternicks
-					self.saveNicks()
+		if (self.msg == 0):
+			nickList = oldNicks.split()
+			for oldNick in nickList:
+				lcOldNick = string.lower(oldNick)
+				lcNick = string.lower(self.sendernick)
+				if (self.NickAka.has_key(lcOldNick)):
+					if (self.NickAka[lcNick] == self.NickAka[lcOldNick]):
+						nicklist = (self.masternicks[self.NickAka[lcNick]])['nicklist']
+						for nick in nicklist:
+							if (string.lower(nick) == lcOldNick):
+								nicklist.remove(nick)
+						del self.NickAka[lcOldNick] #remove mapping
+						self.addnick(oldNick) #make clean mapping - ie fresh masternicks
+						self.saveNicks()
+					else:
+						self.say("%s is not an alias for %s" % (oldNick,self.sendernick))
 				else:
-					self.say("%s is not an alias for %s" % (oldNick,self.sendernick))
-			else:
-				self.say("%s is not an nick I know" % (oldNick))
+					self.say("%s is not an nick I know" % (oldNick))
+		else:
+			self.say('I can only do that in a channel.')
 
 	def cmd_forgetme(self,m):
-		""" Forget my nick's definition """
-		concept = string.lower(self.sendernick)
-		if (not self.definitions.has_key(concept)):
-			self.say('I don\'t know about \'%s\' ' % concept)
-			return;
-		del self.definitions[concept]
-		self.say('I have expunged %s from my mind' % (concept))
-		try:
-			f = open(self.def_file, 'w')
-			pickle.dump(self.definitions, f)
-			f.close()
-		except:
-			pass
-
-	def cmd_forget(self, m):
-		""" Forget a definition """
-		if (m == ""):
-			return
-		words = m.split()
-		if (len(words) < 3):
-			self.say('I need at least 3 words with an \'is\' in the middle')
-			return
-		try:
-			pos = words.index('is') 
-		except:
-			self.say('I need an \'is\' in the middle')
-			return
-		
-		concept = string.lower(' '.join(words[:pos]))
-		definition = ' '.join(words[pos+1:])
-		if (not self.definitions.has_key(concept)):
-			self.say('I don\'t know about \'%s\' ' % concept)
-			return;
-		if(definition in self.definitions[concept]):
-			self.definitions[concept].remove(definition)
-		else:
-			self.say('I didn\'t know %s was %s' % (concept, definition))
-			return;
-		if (len(self.definitions[concept]) == 0):
+		if (self.msg == 0):
+			""" Forget my nick's definition """
+			concept = string.lower(self.sendernick)
+			if (not self.definitions.has_key(concept)):
+				self.say('I don\'t know about \'%s\' ' % concept)
+				return;
 			del self.definitions[concept]
 			self.say('I have expunged %s from my mind' % (concept))
+			try:
+				f = open(self.def_file, 'w')
+				pickle.dump(self.definitions, f)
+				f.close()
+			except:
+				pass
 		else:
-			self.say('I now only know that %s is %s' % (concept, " & ".join(self.definitions[concept])))
-		try:
-			f = open(self.def_file, 'w')
-			pickle.dump(self.definitions, f)
-			f.close()
-			#dumbphrases = ('I am now a dumber bot','Dave, my mind is going...')
-			#self.say(dumbphrases[int(random.random() *len(dumbphrases))])
-		except:
-			pass
+			self.say('I can only do that in a channel.')
+
+	def cmd_forget(self, m):
+		if (self.msg == 0):
+			""" Forget a definition """
+			if (m == ""):
+				return
+			words = m.split()
+			if (len(words) < 3):
+				self.say('I need at least 3 words with an \'is\' in the middle')
+				return
+			try:
+				pos = words.index('is') 
+			except:
+				self.say('I need an \'is\' in the middle')
+				return
+			
+			concept = string.lower(' '.join(words[:pos]))
+			definition = ' '.join(words[pos+1:])
+			if (not self.definitions.has_key(concept)):
+				self.say('I don\'t know about \'%s\' ' % concept)
+				return;
+			if(definition in self.definitions[concept]):
+				self.definitions[concept].remove(definition)
+			else:
+				self.say('I didn\'t know %s was %s' % (concept, definition))
+				return;
+			if (len(self.definitions[concept]) == 0):
+				del self.definitions[concept]
+				self.say('I have expunged %s from my mind' % (concept))
+			else:
+				self.say('I now only know that %s is %s' % (concept, " & ".join(self.definitions[concept])))
+			try:
+				f = open(self.def_file, 'w')
+				pickle.dump(self.definitions, f)
+				f.close()
+				#dumbphrases = ('I am now a dumber bot','Dave, my mind is going...')
+				#self.say(dumbphrases[int(random.random() *len(dumbphrases))])
+			except:
+				pass
+		else:
+			self.say('I can only do that in a channel.')
 			
 	def cmd_def(self, m):
 		""" Display a stored definition """
@@ -881,15 +893,18 @@ class jibot(irclib.irc):
 			except:
 				self.say('%s has no karma points' % nick)
 	def cmd_blog(self, m):
-		if (m == ""):
-			return
-		message = '%s\n%s' % (self.sendernick, m)
-		blog = xmlrpclib.Server('http://www.bloxus.com/RPC.php', verbose = 1)
-		try:
-			if (blog.blogger.newPost('APPKEY', '21', 'jibot', 'jibotblog', message, 1)):
-				self.say('Posted.')
-		except:
-			self.say('I cannot blog.')
+		if (self.msg == 0):
+			if (m == ""):
+				return
+			message = '%s\n%s' % (self.sendernick, m)
+			blog = xmlrpclib.Server('http://www.bloxus.com/RPC.php', verbose = 1)
+			try:
+				if (blog.blogger.newPost('APPKEY', '21', 'jibot', 'jibotblog', message, 1)):
+					self.say('Posted.')
+			except:
+				self.say('I cannot blog.')
+		else:
+			self.say('I can only do that in a channel.')
 
 	def cmd_quit(self, m):
 		if (m == ""):
@@ -901,54 +916,68 @@ class jibot(irclib.irc):
 			self.say("%s: you can't make me quit!" % (self.sendernick))
 	
 	def cmd_favor(self, nick):
-		if (not self.sendernick == self.queen):
-			self.say("Only the Queen has favorites")
-			return	
-		if not nick in self.favorites:
-			self.favorites = [nick] + self.favorites[:4]
-			self.say("%s is now on %s's favorites list" % (nick,self.queen))
-		if nick in self.disfavorites:
-			self.disfavorites.remove(nick)
-		self.saveFavors()
+		if (self.msg == 0):
+			if (not self.sendernick == self.queen):
+				self.say("Only the Queen has favorites")
+				return	
+			if not nick in self.favorites:
+				self.favorites = [nick] + self.favorites[:4]
+				self.say("%s is now on %s's favorites list" % (nick,self.queen))
+			if nick in self.disfavorites:
+				self.disfavorites.remove(nick)
+			self.saveFavors()
+		else:
+			self.say('I can only do that in a channel.')
 
 	def cmd_unfavor(self, nick):
-		if (not self.sendernick == self.queen):
-			self.say("Only the Queen has favorites")
-			return	
-		if nick in self.favorites:
-			self.favorites.remove(nick)
-			self.say("%s is no longer looked upon with favor" % (nick))
-		self.saveFavors()
+		if (self.msg == 0):
+			if (not self.sendernick == self.queen):
+				self.say("Only the Queen has favorites")
+				return	
+			if nick in self.favorites:
+				self.favorites.remove(nick)
+				self.say("%s is no longer looked upon with favor" % (nick))
+			self.saveFavors()
+		else:
+			self.say('I can only do that in a channel.')
 
 	def cmd_pardon(self, nick):
-		if (not self.sendernick == self.queen):
-			self.say("Only the Queen has favorites")
-			return	
-		if nick in self.disfavorites:
-			self.disfavorites.remove(nick)
-			self.say("%s is no longer looked upon with disfavor" % (nick))
-		self.saveFavors()
+		if (self.msg == 0):
+			if (not self.sendernick == self.queen):
+				self.say("Only the Queen has favorites")
+				return	
+			if nick in self.disfavorites:
+				self.disfavorites.remove(nick)
+				self.say("%s is no longer looked upon with disfavor" % (nick))
+			self.saveFavors()
+		else:
+			self.say('I can only do that in a channel.')
 
 	def cmd_disfavor(self, nick):
-		if (not self.sendernick == self.queen):
-			self.say("Only the Queen has favorites")
-			return	
-		if not nick in self.disfavorites:
-			self.disfavorites = [nick] + self.disfavorites[:4]
-			self.say("%s is now on %s's least favorites list" % (nick,self.queen))
-		if nick in self.favorites:
-			self.favorites.remove(nick)
-		self.saveFavors()
-
+		if (self.msg == 0):
+			if (not self.sendernick == self.queen):
+				self.say("Only the Queen has favorites")
+				return	
+			if not nick in self.disfavorites:
+				self.disfavorites = [nick] + self.disfavorites[:4]
+				self.say("%s is now on %s's least favorites list" % (nick,self.queen))
+			if nick in self.favorites:
+				self.favorites.remove(nick)
+			self.saveFavors()
+		else:
+			self.say('I can only do that in a channel.')
 			
 	def cmd_favorites(self,m):
-		if (not self.sendernick == self.queen):
-			self.say("Only the Queen has favorites")
+		if (self.msg == 0):
+			if (not self.sendernick == self.queen):
+				self.say("Only the Queen has favorites")
+			else:
+				if len (self.favorites) >0:
+					self.say("On %s's favorites list: %s" % (self.sendernick, ",".join(self.favorites)))
+				if len (self.disfavorites) >0:
+					self.say("On %s's least favorites list: %s" % (self.sendernick, ",".join(self.disfavorites)))
 		else:
-			if len (self.favorites) >0:
-				self.say("On %s's favorites list: %s" % (self.sendernick, ",".join(self.favorites)))
-			if len (self.disfavorites) >0:
-				self.say("On %s's least favorites list: %s" % (self.sendernick, ",".join(self.disfavorites)))
+			self.say('I can only do that in a channel.')
 
 if __name__ == '__main__':
 	bot = jibot()
